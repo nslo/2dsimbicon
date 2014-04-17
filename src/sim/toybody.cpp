@@ -20,13 +20,13 @@ const double DENSITY = 1.0;
 // lengths (meters) of body parts
 const double LENGTH_TORSO = 0.48;
 const double LENGTH_THIGH = 0.45;
-const double LENGTH_SHIN = 0.45;
+const double LENGTH_SHIN = 0.4;
 const double LENGTH_FOOT = 0.2;
 
 // masses (kilograms) of body parts
-const double MASS_TORSO = 70.0;
+const double MASS_TORSO = 7.0;
 const double MASS_THIGH = 5.0;
-const double MASS_SHIN = 4.0;
+const double MASS_SHIN = 5.0;
 const double MASS_FOOT = 1.0;
 
 // initial torso position
