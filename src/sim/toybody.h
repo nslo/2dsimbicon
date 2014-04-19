@@ -8,6 +8,27 @@
 const int NUM_BODY = 7;
 const int NUM_JOINTS = NUM_BODY - 1;
 
+// ID ordering
+enum BODY_ORDER
+{
+    BODY_TORSO,
+    BODY_LTHIGH,
+    BODY_RTHIGH,
+    BODY_LSHIN,
+    BODY_RSHIN,
+    BODY_LFOOT,
+    BODY_RFOOT
+};
+enum JOINT_ORDER
+{
+    JOINT_LHIP,
+    JOINT_RHIP,
+    JOINT_LKNEE,
+    JOINT_RKNEE,
+    JOINT_LANKLE,
+    JOINT_RANKLE
+};
+
 class ToyBody : public Body
 {
     friend class ToyControl;

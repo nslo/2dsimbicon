@@ -1,5 +1,5 @@
-#ifndef _TOY_CONTROL_
-#define _TOY_CONTROL_
+#ifndef _TOY_CONTROL_H_
+#define _TOY_CONTROL_H_
 
 #include <iostream>
 #include <fstream>

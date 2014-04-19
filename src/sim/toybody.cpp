@@ -32,27 +32,6 @@ const double MASS_FOOT = 1.0;
 // initial torso position
 const double TORSO_POS = 0.5 * LENGTH_TORSO + LENGTH_THIGH + LENGTH_SHIN + 0.5 * XSIDE;
 
-// ID ordering
-enum BODY_ORDER
-{
-    BODY_TORSO,
-    BODY_LTHIGH,
-    BODY_RTHIGH,
-    BODY_LSHIN,
-    BODY_RSHIN,
-    BODY_LFOOT,
-    BODY_RFOOT
-};
-enum JOINT_ORDER
-{
-    JOINT_LHIP,
-    JOINT_RHIP,
-    JOINT_LKNEE,
-    JOINT_RKNEE,
-    JOINT_LANKLE,
-    JOINT_RANKLE
-};
-
 static const int drawOrder[NUM_BODY] = {
     BODY_LTHIGH, BODY_LSHIN, BODY_LFOOT,
     BODY_TORSO,

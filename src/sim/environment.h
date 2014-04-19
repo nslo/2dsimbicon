@@ -1,11 +1,11 @@
-#ifndef _ENVIRONMENT_
-#define _ENVIRONMENT_
+#ifndef _ENVIRONMENT_H_
+#define _ENVIRONMENT_H_
 
 #include <iostream>
 #include <ode/ode.h>
 
-#define GLB_CFM 1e-10
-#define GLB_ERP 0.8
+const double GLB_CFM = 1e-10;
+const double GLB_ERP = 0.8;
 
 struct Environment
 {

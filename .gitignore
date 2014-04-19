@@ -2,3 +2,4 @@
 *.swo
 .ycm*
 /bin
+main

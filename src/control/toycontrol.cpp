@@ -4,6 +4,7 @@
 #include <iostream>
 #include <render/drawstuff.h>
 #include <sim/simulator.h>
+#include <sim/toybody.h>
 #include "toycontrol.h"
 
 #ifdef dDOUBLE
@@ -19,7 +20,7 @@ ToyControl::ToyControl(ToyBody& human)
 {
     for (int i = 0; i < NUM_JOINTS; i++)
     {
-        _ks[i] = 300.0;
+        _ks[i] = 300.0;  // kp in simbicon paper
         _kd[i] = 30.0;
         _target[i] = 0;
     }
@@ -47,6 +48,7 @@ int ToyControl::action()
         dJointID jt = _toy.joint[i].id();
         double limit = _ks[i];
 
+        // angles are in radians
         dReal theta = dJointGetHingeAngle(jt);
         dReal thetav = dJointGetHingeAngleRate(jt);
         dReal torque =

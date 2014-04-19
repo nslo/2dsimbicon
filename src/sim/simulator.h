@@ -1,14 +1,14 @@
-#ifndef _SIMULATOR_
-#define _SIMULATOR_
+#ifndef _SIMULATOR_H_
+#define _SIMULATOR_H_
 
 #include <control/controller.h>
 #include <vector>
 #include "body.h"
 #include "environment.h"
 
-#define SPS (1000)
-#define STEP_SIZE (1.0 / SPS)
-#define NUM_CONTACTP 3
+const int SPS = 1000;
+const double STEP_SIZE = 1.0 / SPS;
+const int NUM_CONTACTP = 3;
 
 class Simulator
 {
