@@ -1,25 +1,24 @@
-#include <control/toycontrol.h>
+#include <control/simbicon_control.h>
 #include <fstream>
 #include <iostream>
 #include <render/renderer.h>
 #include <sim/simulator.h>
-#include <sim/toybody.h>
-
-const int VPX = 1024;
-const int VPY = 768;
+#include <sim/biped7.h>
 
 int main(int argc, char **argv)
 {
     dInitODE();
 
-    int render_steps = 10000;
-    double gx = 0.0;
-    double gy = -9.8;
-    double gz = 0.0;
+    const int VPX = 1024;
+    const int VPY = 768;
+    const int render_steps = 10000;
+    const double gx = 0.0;
+    const double gy = -9.8;
+    const double gz = 0.0;
 
     Environment myEnv(gx, gy, gz);
-    ToyBody myBody(myEnv);
-    ToyControl myControl(myBody);
+    Biped7 myBody(myEnv);
+    SimbiconControl myControl(myBody);
     Simulator mySim(myBody, myEnv, render_steps, STEP_SIZE);
     mySim.setController(&myControl);
     myControl.setSimulator(&mySim);

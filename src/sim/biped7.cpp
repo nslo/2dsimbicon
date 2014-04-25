@@ -1,9 +1,9 @@
 #include <iostream>
 #include <render/drawstuff.h>
 #include "simulator.h"
-#include "toybody.h"
+#include "biped7.h"
 
-// ODE convenience
+/* ODE convenience. */
 #ifdef dDOUBLE
 #define dsDrawBox dsDrawBoxD
 #define dsDrawSphere dsDrawSphereD
@@ -11,25 +11,25 @@
 #define dsDrawCapsule dsDrawCapsuleD
 #endif
 
-// initial side lengths and densities of boxes
+/* Initial side lengths and densities of boxes. */
 //const double YSIDE = 0.2;
 const double XSIDE = 0.04;
 const double ZSIDE = 1e-6;
 const double DENSITY = 1.0;
 
-// lengths (meters) of body parts
+/* Lengths (meters) of body parts. */
 const double LENGTH_TORSO = 0.48;
 const double LENGTH_THIGH = 0.45;
 const double LENGTH_SHIN = 0.45;
 const double LENGTH_FOOT = 0.2;
 
-// masses (kilograms) of body parts
+/* Masses (kilograms) of body parts. */
 const double MASS_TORSO = 70.0;
 const double MASS_THIGH = 5.0;
 const double MASS_SHIN = 4.0;
 const double MASS_FOOT = 1.0;
 
-// initial torso position
+/* Initial torso position. */
 const double TORSO_POS = 0.5 * LENGTH_TORSO + LENGTH_THIGH + LENGTH_SHIN + 0.5 * XSIDE;
 
 static const int drawOrder[NUM_BODY] = {
@@ -37,80 +37,80 @@ static const int drawOrder[NUM_BODY] = {
     BODY_TORSO,
     BODY_RTHIGH, BODY_RSHIN, BODY_RFOOT};
 
-void ToyBody::positionBody()
+void Biped7::positionBody()
 {
     dMass m;
 
-    // torso
+    /* Torso. */
     body[BODY_TORSO].setPosition(0, TORSO_POS, 0) ;
     m.setBox(DENSITY, XSIDE, LENGTH_TORSO, ZSIDE);
     m.adjust(MASS_TORSO);
     body[BODY_TORSO].setMass(&m);
     box[BODY_TORSO].setBody(body[BODY_TORSO]);
-    // left thigh
+    /* Left thigh. */
     body[BODY_LTHIGH].setPosition(0, TORSO_POS - 0.5 * LENGTH_TORSO - 0.5 * LENGTH_THIGH, 0) ;
     m.setBox(DENSITY, XSIDE, LENGTH_THIGH, ZSIDE);
     m.adjust(MASS_THIGH);
     body[BODY_LTHIGH].setMass(&m);
     box[BODY_LTHIGH].setBody(body[BODY_LTHIGH]);
-    // right thigh
+    /* Right thigh. */
     body[BODY_RTHIGH].setPosition(0, TORSO_POS - 0.5 * LENGTH_TORSO - 0.5 * LENGTH_THIGH, 0) ;
     m.setBox(DENSITY, XSIDE, LENGTH_THIGH, ZSIDE);
     m.adjust(MASS_THIGH);
     body[BODY_RTHIGH].setMass(&m);
     box[BODY_RTHIGH].setBody(body[BODY_RTHIGH]);
-    // left shin
+    /* Left shin. */
     body[BODY_LSHIN].setPosition(0, TORSO_POS - 0.5 * LENGTH_TORSO - LENGTH_THIGH - 0.5 * LENGTH_SHIN, 0) ;
     m.setBox(DENSITY, XSIDE, LENGTH_SHIN, ZSIDE);
     m.adjust(MASS_SHIN);
     body[BODY_LSHIN].setMass(&m);
     box[BODY_LSHIN].setBody(body[BODY_LSHIN]);
-    // right shin
+    /* Right shin. */
     body[BODY_RSHIN].setPosition(0, TORSO_POS - 0.5 * LENGTH_TORSO - LENGTH_THIGH - 0.5 * LENGTH_SHIN, 0) ;
     m.setBox(DENSITY, XSIDE, LENGTH_SHIN, ZSIDE);
     m.adjust(MASS_SHIN);
     body[BODY_RSHIN].setMass(&m);
     box[BODY_RSHIN].setBody(body[BODY_RSHIN]);
-    // left foot
+    /* Left foot. */
     body[BODY_LFOOT].setPosition(LENGTH_FOOT / 2, TORSO_POS - 0.5 * LENGTH_TORSO - LENGTH_THIGH - LENGTH_SHIN, 0) ;
     m.setBox(DENSITY, LENGTH_FOOT, XSIDE, ZSIDE);
     m.adjust(MASS_FOOT);
     body[BODY_LFOOT].setMass(&m);
     box[BODY_LFOOT].setBody(body[BODY_LFOOT]);
-    // right foot
+    /* Right foot. */
     body[BODY_RFOOT].setPosition(LENGTH_FOOT / 2, TORSO_POS - 0.5 * LENGTH_TORSO - LENGTH_THIGH - LENGTH_SHIN, 0) ;
     m.setBox(DENSITY, LENGTH_FOOT, XSIDE, ZSIDE);
     m.adjust(MASS_FOOT);
     body[BODY_RFOOT].setMass(&m);
     box[BODY_RFOOT].setBody(body[BODY_RFOOT]);
 
-    // (left?) hip
+    /* Left hip. */
     joint[JOINT_LHIP].attach(body[BODY_TORSO], body[BODY_LTHIGH]);
     joint[JOINT_LHIP].setAnchor(0, TORSO_POS - 0.5 * LENGTH_TORSO, 0);
     joint[JOINT_LHIP].setAxis(0, 0, 1.0);
-    // right hip
+    /* Right hip. */
     joint[JOINT_RHIP].attach(body[BODY_TORSO], body[BODY_RTHIGH]);
     joint[JOINT_RHIP].setAnchor(0, TORSO_POS - 0.5 * LENGTH_TORSO, 0);
     joint[JOINT_RHIP].setAxis(0, 0, 1.0);
-    // left knee
+    /* Left knee. */
     joint[JOINT_LKNEE].attach(body[BODY_LTHIGH], body[BODY_LSHIN]);
     joint[JOINT_LKNEE].setAnchor(0, TORSO_POS - 0.5 * LENGTH_TORSO - LENGTH_THIGH, 0);
     joint[JOINT_LKNEE].setAxis(0, 0, 1.0);
-    // right knee
+    /* Right knee. */
     joint[JOINT_RKNEE].attach(body[BODY_RTHIGH], body[BODY_RSHIN]);
     joint[JOINT_RKNEE].setAnchor(0, TORSO_POS - 0.5 * LENGTH_TORSO - LENGTH_THIGH, 0);
     joint[JOINT_RKNEE].setAxis(0, 0, 1.0);
-    // left ankle
+    /* Left ankle. */
     joint[JOINT_LANKLE].attach(body[BODY_LSHIN], body[BODY_LFOOT]);
     joint[JOINT_LANKLE].setAnchor(0, TORSO_POS - 0.5 * LENGTH_TORSO - LENGTH_THIGH - LENGTH_SHIN, 0);
     joint[JOINT_LANKLE].setAxis(0, 0, 1.0);
-    // right ankle
+    /* Right ankle. */
     joint[JOINT_RANKLE].attach(body[BODY_RSHIN], body[BODY_RFOOT]);
     joint[JOINT_RANKLE].setAnchor(0, TORSO_POS - 0.5 * LENGTH_TORSO - LENGTH_THIGH - LENGTH_SHIN, 0);
     joint[JOINT_RANKLE].setAxis(0, 0, 1.0);
 }
 
-ToyBody::ToyBody(Environment& env) : _env(env)
+Biped7::Biped7(Environment& env) : _env(env)
 {
     for (int i = 0; i < NUM_BODY; i++)
     {
@@ -137,11 +137,11 @@ ToyBody::ToyBody(Environment& env) : _env(env)
     positionBody();
 }
 
-void ToyBody::reset()
+void Biped7::reset()
 {
 }
 
-void ToyBody::render()
+void Biped7::render()
 {
     dsSetTexture(DS_WOOD);
     for (int i = 0; i < NUM_BODY; i++)

@@ -5,10 +5,7 @@
 #include "body.h"
 #include "environment.h"
 
-const int NUM_BODY = 7;
-const int NUM_JOINTS = NUM_BODY - 1;
-
-// ID ordering
+/* Link and joint labeling and ordering. */
 enum BODY_ORDER
 {
     BODY_TORSO,
@@ -17,7 +14,8 @@ enum BODY_ORDER
     BODY_LSHIN,
     BODY_RSHIN,
     BODY_LFOOT,
-    BODY_RFOOT
+    BODY_RFOOT,
+    BODY_END
 };
 enum JOINT_ORDER
 {
@@ -29,9 +27,19 @@ enum JOINT_ORDER
     JOINT_RANKLE
 };
 
-class ToyBody : public Body
+const int NUM_BODY = BODY_END;
+const int NUM_JOINTS = NUM_BODY - 1;
+
+class Biped7 : public Body
 {
-    friend class ToyControl;
+    friend class SimbiconControl;
+
+public:
+    Biped7(Environment& env);
+    void render();
+    void reset();
+
+private:
     dBody body[NUM_BODY];
     dHingeJoint joint[NUM_JOINTS];
     dJointID joint_2d_cons[NUM_BODY];
@@ -39,10 +47,6 @@ class ToyBody : public Body
     Environment& _env;
 
     void positionBody();
-public:
-    ToyBody(Environment& env);
-    void render();
-    void reset();
 };
 
 #endif

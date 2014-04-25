@@ -1,11 +1,11 @@
 SRCS = \
 		 main.cpp \
-		 control/toycontrol.cpp \
+		 control/simbicon_control.cpp \
 		 render/drawstuff.cpp \
 		 render/renderer.cpp \
 		 render/x11.cpp \
 		 sim/simulator.cpp \
-		 sim/toybody.cpp
+		 sim/biped7.cpp
 
 CC=clang++
 CFLAGS = -Wall -Wextra -Werror -pedantic -std=c++11 -O2 \
