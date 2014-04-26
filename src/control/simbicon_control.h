@@ -5,49 +5,67 @@
 #include <fstream>
 #include <sim/biped7.h>
 #include <sim/simulator.h>
+#include <vector>
 #include "controller.h"
+
+enum simbicon_targets
+{
+    SIMBICON_TOR,
+    SIMBICON_SWH,
+    SIMBICON_SWK,
+    SIMBICON_SWA,
+    SIMBICON_STK,
+    SIMBICON_STA,
+    SIMBICON_TARGET_END
+};
 
 struct Simbicon_state
 {
     int id;
-    int next_id;
+    int next_state;
     double duration;
-    double target_joint_angle[NUM_JOINTS];
+    double c_d;
+    double c_v;
+    double target[SIMBICON_TARGET_END];
     BODY_ORDER stance_foot;
 };
 
 class SimbiconControl : public Controller
 {
 public:
-    SimbiconControl(Biped7& toy);
+    SimbiconControl(Biped7& _biped);
     ~SimbiconControl();
     int action();
-    double eval();
-    double discount()
-    {
-        return 1;
-    }
-    double norm();
-    void render();
-    void reset();
+    int getSimLength();
     void setSimulator(Simulator* simptr)
     {
         sim = simptr;
     }
-    int getSimLength();
+    double discount()
+    {
+        return 1;
+    }
+    void reset();
+    double eval(); /* Not using. */
+    double norm(); /* Not using. */
+    void render(); /* Not using. */
 
 private:
-    Biped7& toy;
+    Biped7& biped;
     Simulator* sim;
+    /* The states in the state machine. */
+    std::vector<Simbicon_state> states;
+    int current_state;
+    double start_time;
+    double elapsed_time;
+    BODY_ORDER current_stance;
+    static const int num_targets = SIMBICON_TARGET_END;
+    /* The below is for the current step. */
     double kp[NUM_JOINTS];
     double kd[NUM_JOINTS];
     double target[NUM_JOINTS];
     double joint_limit[NUM_JOINTS];
     double torque_limit[NUM_JOINTS];
-    static const int num_states = 4;
-    Simbicon_state states[num_states];
-    int current_state;
-    double elapsed_time;
 };
 
 #endif

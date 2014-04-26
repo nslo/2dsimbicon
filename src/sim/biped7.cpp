@@ -84,27 +84,27 @@ void Biped7::positionBody()
     joint[JOINT_RANKLE].setAxis(0, 0, 1.0);
 }
 
-Biped7::Biped7(Environment& env) : _env(env)
+Biped7::Biped7(Environment& _env) : env(_env)
 {
     for (int i = 0; i < NUM_BODY; i++)
     {
-        body[i].create(_env.world);
+        body[i].create(env.world);
     }
     for (int i = 0; i < NUM_JOINTS; i++)
     {
-        joint[i].create(_env.world);
+        joint[i].create(env.world);
     }
-    box[BODY_TORSO].create(_env.space, XSIDE, LENGTH_TORSO, ZSIDE);
-    box[BODY_LTHIGH].create(_env.space, XSIDE, LENGTH_THIGH, ZSIDE);
-    box[BODY_RTHIGH].create(_env.space, XSIDE, LENGTH_THIGH, ZSIDE);
-    box[BODY_LSHIN].create(_env.space, XSIDE, LENGTH_SHIN, ZSIDE);
-    box[BODY_RSHIN].create(_env.space, XSIDE, LENGTH_SHIN, ZSIDE);
-    box[BODY_LFOOT].create(_env.space, LENGTH_FOOT, XSIDE, ZSIDE);
-    box[BODY_RFOOT].create(_env.space, LENGTH_FOOT, XSIDE, ZSIDE);
+    box[BODY_TORSO].create(env.space, XSIDE, LENGTH_TORSO, ZSIDE);
+    box[BODY_LTHIGH].create(env.space, XSIDE, LENGTH_THIGH, ZSIDE);
+    box[BODY_RTHIGH].create(env.space, XSIDE, LENGTH_THIGH, ZSIDE);
+    box[BODY_LSHIN].create(env.space, XSIDE, LENGTH_SHIN, ZSIDE);
+    box[BODY_RSHIN].create(env.space, XSIDE, LENGTH_SHIN, ZSIDE);
+    box[BODY_LFOOT].create(env.space, LENGTH_FOOT, XSIDE, ZSIDE);
+    box[BODY_RFOOT].create(env.space, LENGTH_FOOT, XSIDE, ZSIDE);
 
     for (int i = 0; i < NUM_BODY; i++)
     {
-        joint_2d_cons[i] = dJointCreatePlane2D(_env.world.id(), 0);
+        joint_2d_cons[i] = dJointCreatePlane2D(env.world.id(), 0);
         dJointAttach(joint_2d_cons[i], body[i].id(), 0);
     }
 

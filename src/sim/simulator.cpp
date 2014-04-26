@@ -180,7 +180,6 @@ double Simulator::getSlope()
 void Simulator::wrapperToCallback(void* data, dGeomID o1, dGeomID o2)
 {
     Simulator* myself = (Simulator *)ptr2ActiveSim;
-
     myself->nearCallback(data, o1, o2);
 }
 
@@ -188,12 +187,18 @@ void Simulator::nearCallback(void* data, dGeomID o1, dGeomID o2)
 {
     UNUSED(data);
 
-    if (!_enableContact) return;
+    if (!_enableContact)
+    {
+        return;
+    }
 
     dBodyID b1 = dGeomGetBody(o1);
     dBodyID b2 = dGeomGetBody(o2);
 
-    if (b1 && b2) return;
+    if (b1 && b2)
+    {
+        return;
+    }
     //if (b1 && b2 && dAreConnected (b1,b2)) return;
 
     dContact contact[NUM_CONTACTP];
@@ -203,9 +208,7 @@ void Simulator::nearCallback(void* data, dGeomID o1, dGeomID o2)
         contact[i].surface.mu = _mu;
     }
 
-    int numc = dCollide(
-            o1, o2, NUM_CONTACTP, &contact[0].geom, sizeof(dContact));
-
+    int numc = dCollide(o1, o2, NUM_CONTACTP, &contact[0].geom, sizeof(dContact));
     if (numc > 0)
     {
         for (int i = 0; i < numc; i++)

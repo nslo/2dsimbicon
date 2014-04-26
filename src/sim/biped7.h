@@ -27,8 +27,6 @@ enum JOINT_ORDER
     JOINT_RANKLE
 };
 
-/* Figure out a better structure for these at some point so they don't
- * have to be global. */
 const int NUM_BODY = BODY_END;
 const int NUM_JOINTS = NUM_BODY - 1;
 
@@ -37,7 +35,7 @@ class Biped7 : public Body
 friend class SimbiconControl;
 
 public:
-    Biped7(Environment& env);
+    Biped7(Environment& _env);
     void render();
     void reset();
 
@@ -46,7 +44,7 @@ private:
     dHingeJoint joint[NUM_JOINTS];
     dJointID joint_2d_cons[NUM_BODY];
     dBox box[NUM_BODY];
-    Environment& _env;
+    Environment& env;
 
     /* Initial side lengths and densities of boxes. */
     //const double YSIDE = 0.2;
@@ -69,6 +67,7 @@ private:
     /* Initial torso position. */
     const double TORSO_POS = 0.5 * LENGTH_TORSO + LENGTH_THIGH + LENGTH_SHIN + 0.5 * XSIDE;
 
+    /* Set up initial position. */
     void positionBody();
 };
 

@@ -37,6 +37,10 @@ public:
     {
         return _body;
     }
+    Environment& getEnv()
+    {
+        return _env;
+    }
     void setMu(double mu);
     void setSlope(double degree);
     double getSlope();
