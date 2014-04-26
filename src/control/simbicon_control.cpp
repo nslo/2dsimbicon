@@ -148,35 +148,35 @@ SimbiconControl::SimbiconControl(Biped7& _biped) : biped(_biped)
     start_time = 0;
     elapsed_time = 0;
 
-    for (int i = 0; i < NUM_JOINTS; i++)
+    for (int i = 0; i < SIMBICON_TARGET_END; i++)
     {
         kp[i] = 300.0;
         kd[i] = 30.0;
-        torque_limit[i] = 1000;
-        switch(i)
-        {
-            case JOINT_LHIP:
-                target_angle[i] = -1;
-                break;
-            case JOINT_RHIP:
-                target_angle[i] = 0.5;
-                break;
-            case JOINT_LKNEE:
-                target_angle[i] = 1;
-                break;
-            case JOINT_RKNEE:
-                target_angle[i] = 0;
-                break;
-            case JOINT_LANKLE:
-                target_angle[i] = 0;
-                break;
-            case JOINT_RANKLE:
-                target_angle[i] = 0;
-                break; 
-            default:
-                assert(0);
-                break;
-        }
+        torque_limit[i] = 400;
+        //switch(i)
+        //{
+        //    case JOINT_LHIP:
+        //        target_angle[i] = -1;
+        //        break;
+        //    case JOINT_RHIP:
+        //        target_angle[i] = 0.5;
+        //        break;
+        //    case JOINT_LKNEE:
+        //        target_angle[i] = 1;
+        //        break;
+        //    case JOINT_RKNEE:
+        //        target_angle[i] = 0;
+        //        break;
+        //    case JOINT_LANKLE:
+        //        target_angle[i] = 0;
+        //        break;
+        //    case JOINT_RANKLE:
+        //        target_angle[i] = 0;
+        //        break; 
+        //    default:
+        //        assert(0);
+        //        break;
+        //}
     }
 }
 
@@ -340,7 +340,7 @@ void SimbiconControl::compute_torque(simbicon_target_t simbicon_joint)
             if (j == JOINT_LKNEE || j == JOINT_RKNEE)
             {
                 // TODO reverse torque? Or angle?
-                torque[j] *= -1.0;
+                //torque[j] *= -1.0;
             }
 
             dJointAddHingeTorque(jt, torque[j]);
