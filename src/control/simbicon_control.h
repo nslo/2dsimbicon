@@ -8,14 +8,15 @@
 #include <vector>
 #include "controller.h"
 
-enum simbicon_targets
+enum simbicon_target_t
 {
-    SIMBICON_TOR,
     SIMBICON_SWH,
     SIMBICON_SWK,
     SIMBICON_SWA,
+    SIMBICON_STH,
     SIMBICON_STK,
     SIMBICON_STA,
+    SIMBICON_TOR,
     SIMBICON_TARGET_END
 };
 
@@ -24,10 +25,15 @@ struct Simbicon_state
     int id;
     int next_state;
     double duration;
+    /* Gains. */
     double c_d;
     double c_v;
+    /* First element in this array won't be used. */
     double target[SIMBICON_TARGET_END];
-    BODY_ORDER stance_foot;
+    /* The foot actually on the ground. */
+    body_link_t stance_foot;
+    /* The foot we want to detect a collision on. */
+    body_link_t collision_foot;
 };
 
 class SimbiconControl : public Controller
@@ -58,13 +64,12 @@ private:
     int current_state;
     double start_time;
     double elapsed_time;
-    BODY_ORDER current_stance;
-    static const int num_targets = SIMBICON_TARGET_END;
     /* The below is for the current step. */
     double kp[NUM_JOINTS];
     double kd[NUM_JOINTS];
-    double target[NUM_JOINTS];
-    double joint_limit[NUM_JOINTS];
+    double target_angle[NUM_JOINTS];
+    double torque[NUM_JOINTS];
+    double target_angle_limit[NUM_JOINTS];
     double torque_limit[NUM_JOINTS];
 };
 

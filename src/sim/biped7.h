@@ -6,7 +6,7 @@
 #include "environment.h"
 
 /* Link and joint labeling and ordering. */
-enum BODY_ORDER
+enum body_link_t
 {
     BODY_TORSO,
     BODY_LTHIGH,
@@ -17,7 +17,7 @@ enum BODY_ORDER
     BODY_RFOOT,
     BODY_END
 };
-enum JOINT_ORDER
+enum joint_t
 {
     JOINT_LHIP,
     JOINT_RHIP,

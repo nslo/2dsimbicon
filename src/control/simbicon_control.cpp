@@ -18,25 +18,24 @@
 
 //const double epsilon = 0.00001;
 
-enum coords
+enum coord_t
 {
     X,
     Y,
     Z
 };
 
-SimbiconControl::SimbiconControl(Biped7& _biped)
-    : biped(_biped)
+SimbiconControl::SimbiconControl(Biped7& _biped) : biped(_biped)
 {
     /* Set up the four states here. */
-    // TODO make sure left/right stance foot is correct
     Simbicon_state state0;
     state0.id = 0;
     state0.next_state = 1;
     state0.duration = 0.3; /* 0.3s TODO relate this to stepsize */
     state0.c_d = 0.0;
     state0.c_v = 0.20;
-    state0.stance_foot = BODY_RFOOT; /* Arbitrary decision which is which. */
+    state0.collision_foot = BODY_RFOOT;
+    state0.stance_foot = BODY_RFOOT;
     state0.target[SIMBICON_TOR] = 0.0;      /* WRT world. */
     state0.target[SIMBICON_SWH] = 0.40;     /* WRT world. */
     state0.target[SIMBICON_SWK] = -1.10;    /* Local. */
@@ -48,10 +47,11 @@ SimbiconControl::SimbiconControl(Biped7& _biped)
     Simbicon_state state1;
     state1.id = 1;
     state1.next_state = 2;
-    state1.duration = 0.3; /* Actually will transition on contact. TODO */
+    state1.duration = 0.3; /* Actually will transition on contact. */
     state1.c_d = 2.20;
     state1.c_v = 0.0;
-    state1.stance_foot = BODY_LFOOT; /* Arbitrary decision which is which. */
+    state1.collision_foot = BODY_LFOOT;
+    state1.stance_foot = BODY_RFOOT;
     state1.target[SIMBICON_TOR] = 0.0;      /* WRT world. */
     state1.target[SIMBICON_SWH] = -0.70;    /* WRT world. */
     state1.target[SIMBICON_SWK] = -0.05;    /* Local. */
@@ -59,21 +59,22 @@ SimbiconControl::SimbiconControl(Biped7& _biped)
     state1.target[SIMBICON_STK] = -0.10;    /* Local. */
     state1.target[SIMBICON_STA] = 0.20;     /* Local. */
     states.push_back(state1);
-    
+
     /* The other states are mirror images of the first two. */
     Simbicon_state state2 = state0;
+    state2.collision_foot = BODY_LFOOT;
     state2.stance_foot = BODY_LFOOT;
     state2.next_state = 3;
     states.push_back(state2);
-    
+
     Simbicon_state state3 = state1;
-    state3.stance_foot = BODY_RFOOT;
+    state3.collision_foot = BODY_RFOOT;
+    state3.stance_foot = BODY_LFOOT;
     state3.next_state = 0;
     states.push_back(state3);
 
-    /* Start off on the left foot. */ // TODO ??
+    /* Start off on the right foot. */
     current_state = 0;
-    current_stance = states[current_state].stance_foot;
     start_time = 0;
     elapsed_time = 0;
 
@@ -85,22 +86,22 @@ SimbiconControl::SimbiconControl(Biped7& _biped)
         switch(i)
         {
             case JOINT_LHIP:
-                target[i] = -1;
+                target_angle[i] = -1;
                 break;
             case JOINT_RHIP:
-                target[i] = 0.5;
+                target_angle[i] = 0.5;
                 break;
             case JOINT_LKNEE:
-                target[i] = 1;
+                target_angle[i] = 1;
                 break;
             case JOINT_RKNEE:
-                target[i] = 0;
+                target_angle[i] = 0;
                 break;
             case JOINT_LANKLE:
-                target[i] = 0;
+                target_angle[i] = 0;
                 break;
             case JOINT_RANKLE:
-                target[i] = 0;
+                target_angle[i] = 0;
                 break; 
             default:
                 assert(0);
@@ -128,39 +129,88 @@ int SimbiconControl::action()
             biped.body[BODY_LFOOT].getLinearVel()[Y],
             biped.body[BODY_RFOOT].getLinearVel()[Y]);
 
-    // TODO Decide what the stance foot is. */
-    // check for a transition - if the stance is A, check for duration reached
-    // if it's B, check for foot contact - for now start in a state with duration?
+    /* Check for transitions. */
     switch (current_state)
     {
         case 0:
         case 2:
-            /* Check for a time transition. */
-            if (elapsed_time > states[current_state].duration)
             {
-                current_state = states[current_state].next_state;
-                start_time = sim->currentTime();
+                /* Check for an elapsed time transition. */
+                if (elapsed_time > states[current_state].duration)
+                {
+                    current_state = states[current_state].next_state;
+                    start_time = sim->currentTime();
+                }
+                break;
             }
-            break;
         case 1:
         case 3:
-            /* Check for a contact transition. */ // TODO how to do this?
-            BODY_ORDER foot = states[current_state].stance_foot;
-
-            dContactGeom temp_contacts[NUM_CONTACTP];
-            if (dCollide(sim->getEnv().ground.id(), biped.box[foot].id(), NUM_CONTACTP,
-                    temp_contacts, sizeof(dContactGeom)))
             {
-                printf("colliding foot %d\n", foot);
-                current_state = states[current_state].next_state;
-                start_time = sim->currentTime();
+                /* Check for a contact transition. */
+                body_link_t foot = states[current_state].collision_foot;
+                dContactGeom temp_contacts[NUM_CONTACTP];
+                if (dCollide(sim->getEnv().ground.id(), biped.box[foot].id(),
+                            NUM_CONTACTP, temp_contacts, sizeof(dContactGeom)))
+                {
+                    printf("colliding foot %d\n", foot);
+                    current_state = states[current_state].next_state;
+                    start_time = sim->currentTime();
+                }
+                break;
             }
+        default:
+            /* Should never get here. */
+            assert(0);
             break;
     }
 
+    /* Get stance. */
+    joint_t joint_side[SIMBICON_TARGET_END];
+    body_link_t foot = states[current_state].stance_foot;
+    switch (foot)
+    {
+        case BODY_LFOOT:
+            joint_side[SIMBICON_SWH] = JOINT_RHIP;
+            joint_side[SIMBICON_SWK] = JOINT_RKNEE;
+            joint_side[SIMBICON_SWA] = JOINT_RANKLE;
+            joint_side[SIMBICON_STH] = JOINT_LHIP;
+            joint_side[SIMBICON_STK] = JOINT_LKNEE;
+            joint_side[SIMBICON_STA] = JOINT_LANKLE;
+            /* Left foot on the ground. */
+            break;
+        case BODY_RFOOT:
+            /* Right foot on the ground. */
+            joint_side[SIMBICON_SWH] = JOINT_LHIP;
+            joint_side[SIMBICON_SWK] = JOINT_LKNEE;
+            joint_side[SIMBICON_SWA] = JOINT_LANKLE;
+            joint_side[SIMBICON_STH] = JOINT_RHIP;
+            joint_side[SIMBICON_STK] = JOINT_RKNEE;
+            joint_side[SIMBICON_STA] = JOINT_RANKLE;
+            break;
+        default:
+            /* Should never get here. */
+            assert(0);
+            break;
+    }
+
+    /* Set joint targets appropriately. For joints other than hips, the target
+     * angle comes from the FSM. */
+    target_angle[joint_side[SIMBICON_SWK]] =
+        states[current_state].target[SIMBICON_SWK];
+    target_angle[joint_side[SIMBICON_SWA]] =
+        states[current_state].target[SIMBICON_SWA];
+    target_angle[joint_side[SIMBICON_STK]] =
+        states[current_state].target[SIMBICON_STK];
+    target_angle[joint_side[SIMBICON_STA]] =
+        states[current_state].target[SIMBICON_STA];
+
+    /* Stance hip: calculate angle and velocity of torso wrt global y-axis. */
+    //dVector3 torso_rotation;
+    //dBodyVectorToWorld(body[BODY_TORSO].id(), jk
+
+    /* Swing hip: calculate angle and velocity of swing thigh wrt global y-axis. */
 
 
-    /* Set joint targets appropriately. */
 
     /* Add joint torques to each DOF, pulling the body towards the
      * desired state defined by _target. */
@@ -169,11 +219,10 @@ int SimbiconControl::action()
         dJointID jt = biped.joint[i].id();
         double limit = kp[i];
 
-        // angles are in radians
+        /* Angles are in radians. */
         dReal theta = dJointGetHingeAngle(jt);
         dReal thetav = dJointGetHingeAngleRate(jt);
-        dReal torque =
-            kp[i] * (target[i] - theta) - kd[i] * thetav;
+        dReal torque = kp[i] * (target_angle[i] - theta) - kd[i] * thetav;
 
         if (torque > limit)
         {

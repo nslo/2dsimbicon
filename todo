@@ -1,0 +1,36 @@
+States:
+- Set up states - 0/2, 1/3
+* Make sure initial positions of legs are okay
+
+State transitions:
+- Keep timer (global? each state struct?)
+- Figure out when a foot collision happens (?)
+- Figure out which leg (left or right) is swing and which is stance
+
+Target angles:
+- For all joints except stance hip & swing hip, target angle comes from FSM and current angle/velocity
+- For swing hip and stance hip, calculate angle and velocity relative to y-axis
+    * angle: dBodyVectorToWorld ? + double angleInRadians = std::atan2(y, x);
+    * velocity: ????  dBodyGetAngularVel (is this just about whatever the axis of rotation is? <--- which is z)
+- For swing hip, then apply feedback gains
+    - d: dJointGetHingeAnchor (hip minus stance foot, just x coord)
+        - or dBodyGetRelPointPos - how to specify the single point? getanchor?
+    - v: - dBodyGetLinearVel ? (that's the center of mass, not hip)
+        - put a virtual body on the hip with no mass?
+        - dBodyGetPointVel (with point from getanchor, which is in world coords)?
+
+Torques:
+- For all joints except stance hip, apply PD controller
+- For stance hip, first calculate PD control of virtual torso
+- Then calculate torque of stance hip
+
+Misc:
+- joint, target, torque limits?  (joint limits are 1000 in paper; look at jsimbicon)
+- find out what the zero reference angle is for joints - were they set straight?
+* figure out what 0.3 means in terms of simulator time
+* figure out handedness of angles; are knees reversed?
+
+Sim:
+- apply forces with arrow keys
+- uneven terrain
+- camera follows figure
