@@ -235,7 +235,6 @@ int SimbiconControl::action()
     }
 
     /* Get stance. */
-    joint_t joint_side[SIMBICON_TARGET_END];
     body_link_t foot = states[current_state].stance_foot;
     switch (foot)
     {
@@ -277,8 +276,7 @@ int SimbiconControl::action()
         states[current_state].target[SIMBICON_STA];
 
     /* Stance hip: calculate angle and velocity of torso wrt global y-axis. */
-    dReal torso_angle = get_global_angle(BODY_TORSO);
-    dVector3 torso_velocity;
+    torso_angle = get_global_angle(BODY_TORSO);
     get_global_angular_vel(BODY_TORSO, torso_velocity);
 
     /* Swing hip: calculate angle and velocity of swing thigh wrt global y-axis. */
@@ -299,39 +297,76 @@ int SimbiconControl::action()
     double v = hip_vel[X];
     double swing_theta = states[current_state].target[SIMBICON_SWH] +
         d * states[current_state].c_d + v * states[current_state].c_v;
+    /* Overwrite the swing hip target angle. */
+    states[current_state].target[SIMBICON_SWH] = swing_theta;
 
-    printf("torso_angle: %f, swing_thigh_angle: %f, swing_theta: %f\n",
-            torso_angle, swing_thigh_angle, swing_theta);
+    printf("torso_angle: %f, swing_thigh_angle: %f, swing_theta: %f, torso_vel: (%f, %f, %f)\n",
+            torso_angle, swing_thigh_angle, swing_theta, torso_velocity[0], torso_velocity[1],
+            torso_velocity[2]);
 
-
-
-
-
-    /* Add joint torques to each DOF, pulling the body towards the
-     * desired state defined by _target. */
-    for (int i = 0; i < NUM_JOINTS; i++)
-    {
-        dJointID jt = biped.joint[i].id();
-        double limit = kp[i];
-
-        /* Angles are in radians. */
-        dReal theta = dJointGetHingeAngle(jt);
-        dReal thetav = dJointGetHingeAngleRate(jt);
-        dReal torque = kp[i] * (target_angle[i] - theta) - kd[i] * thetav;
-
-        if (torque > limit)
-        {
-            torque = limit;
-        }
-        if (torque < -limit)
-        {
-            torque = -limit;
-        }
-
-        dJointAddHingeTorque(jt, torque);
-    }
+    /* Compute and apply torques. */
+    compute_torque(SIMBICON_SWK);
+    compute_torque(SIMBICON_SWA);
+    compute_torque(SIMBICON_STK);
+    compute_torque(SIMBICON_STA);
+    compute_torque(SIMBICON_SWH);
+    compute_torque(SIMBICON_STH);
 
     return 0;
+}
+
+void SimbiconControl::compute_torque(simbicon_target_t simbicon_joint)
+{
+    switch (simbicon_joint)
+    {
+        case SIMBICON_SWK:
+        case SIMBICON_SWA:
+        case SIMBICON_STK:
+        case SIMBICON_STA:
+        case SIMBICON_SWH:
+        {
+            joint_t j = joint_side[simbicon_joint];
+            dJointID jt = biped.joint[j].id();
+            dReal theta = dJointGetHingeAngle(jt);
+            dReal thetav = dJointGetHingeAngleRate(jt);
+            torque[j] = kp[j] * (target_angle[j] - theta) - kd[j] * thetav;
+
+            if (torque[j] > torque_limit[j])
+            {
+                torque[j] = torque_limit[j];
+            }
+            if (torque[j] < -torque_limit[j])
+            {
+                torque[j] = -torque_limit[j];
+            }
+
+            if (j == JOINT_LKNEE || j == JOINT_RKNEE)
+            {
+                // TODO reverse torque? Or angle?
+            }
+
+            dJointAddHingeTorque(jt, torque[j]);
+            break;
+        }
+        case SIMBICON_STH:
+        {
+            /* First calcuate virtual pd control torque of torso. */
+            dReal torso_torque =
+                kp[SIMBICON_TOR] * states[current_state].target[SIMBICON_TOR] - torso_angle +
+                kd[SIMBICON_TOR] * torso_velocity[Z]; /* Assume 2D. */
+
+            /* Then calculate stance hip control as a function of torso torque
+             * and swing hip torque. */
+            joint_t j = joint_side[simbicon_joint];
+            torque[j] = -1.0 * torso_torque - torque[joint_side[SIMBICON_SWH]];
+            dJointID jt = biped.joint[j].id();
+            dJointAddHingeTorque(jt, torque[j]);
+            break;
+        }
+        default:
+            /* Shouldn't get here. */
+            assert(0);
+    }
 }
 
 double SimbiconControl::eval()

@@ -59,6 +59,7 @@ public:
 private:
     dReal get_global_angle(body_link_t link);
     void get_global_angular_vel(body_link_t link, dVector3 vel);
+    void compute_torque(simbicon_target_t);
     Biped7& biped;
     Simulator* sim;
     /* The states in the state machine. */
@@ -68,12 +69,15 @@ private:
     double elapsed_time;
     body_link_t swing_thigh;
     /* The below is for the current step. */
-    double kp[NUM_JOINTS];
-    double kd[NUM_JOINTS];
+    double kp[SIMBICON_TARGET_END];
+    double kd[SIMBICON_TARGET_END];
     double target_angle[NUM_JOINTS];
     double torque[NUM_JOINTS];
     double target_angle_limit[NUM_JOINTS];
     double torque_limit[NUM_JOINTS];
+    joint_t joint_side[SIMBICON_TARGET_END];
+    dReal torso_angle;
+    dVector3 torso_velocity;
 };
 
 #endif
