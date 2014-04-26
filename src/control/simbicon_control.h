@@ -57,6 +57,8 @@ public:
     void render(); /* Not using. */
 
 private:
+    dReal get_global_angle(body_link_t link);
+    void get_global_angular_vel(body_link_t link, dVector3 vel);
     Biped7& biped;
     Simulator* sim;
     /* The states in the state machine. */
@@ -64,6 +66,7 @@ private:
     int current_state;
     double start_time;
     double elapsed_time;
+    body_link_t swing_thigh;
     /* The below is for the current step. */
     double kp[NUM_JOINTS];
     double kd[NUM_JOINTS];

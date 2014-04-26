@@ -25,6 +25,76 @@ enum coord_t
     Z
 };
 
+/* Quick, dirty, and unsafe vector functions. */
+static void vector_subtract(dVector3 a, dVector3 b, dVector3 result)
+{
+    result[0] = a[0] - b[0];
+    result[1] = a[1] - b[1];
+    result[2] = a[2] - b[2];
+}
+
+static dReal vector_length(dVector3 v)
+{
+    return std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+}
+
+static dReal vector_dot(dVector3 a, dVector3 b)
+{
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
+
+static dReal cos_theta(dVector3 a, dVector3 b)
+{
+    return vector_dot(a, b) / (vector_length(a) * vector_length(b));
+}
+
+static void vector_cross(dVector3 a, dVector3 b, dVector3 result)
+{
+    dCROSS(result, =, a, b); 
+}
+
+dReal sin_theta(dVector3 a, dVector3 b)
+{
+    dVector3 result;
+    vector_cross(a, b, result);
+    return vector_length(result) / (vector_length(a) * vector_length(b));
+}
+
+dReal SimbiconControl::get_global_angle(body_link_t link)
+{
+    dVector3 link_com;
+    link_com[X] = dBodyGetPosition(biped.body[link].id())[X];
+    link_com[Y] = dBodyGetPosition(biped.body[link].id())[Y];
+    link_com[Z] = dBodyGetPosition(biped.body[link].id())[Z];
+    dVector3 hip_position;
+    /* Shouldn't matter which hip we use for reference position. */
+    dJointGetHingeAnchor(biped.joint[JOINT_LHIP], hip_position);
+    dVector3 link_vector;
+    vector_subtract(link_com, hip_position, link_vector);
+    dVector3 y_axis;
+    y_axis[X] = 0;
+    y_axis[Y] = 1;
+    y_axis[Z] = 0;
+    dReal link_angle = std::acos(cos_theta(link_vector, y_axis));
+    /* We're just going to hack the sign of the angle. */
+    if (link_vector[0] < 0)
+    {
+        link_angle *= -1;
+    }
+
+    return link_angle;
+}
+
+void SimbiconControl::get_global_angular_vel(body_link_t link, dVector3 vel)
+{
+    vel[X] = dBodyGetAngularVel(biped.body[link].id())[X];
+    vel[Y] = dBodyGetAngularVel(biped.body[link].id())[Y];
+    vel[Z] = dBodyGetAngularVel(biped.body[link].id())[Z];
+
+}
+
+
+
 SimbiconControl::SimbiconControl(Biped7& _biped) : biped(_biped)
 {
     /* Set up the four states here. */
@@ -176,6 +246,7 @@ int SimbiconControl::action()
             joint_side[SIMBICON_STH] = JOINT_LHIP;
             joint_side[SIMBICON_STK] = JOINT_LKNEE;
             joint_side[SIMBICON_STA] = JOINT_LANKLE;
+            swing_thigh = BODY_RTHIGH;
             /* Left foot on the ground. */
             break;
         case BODY_RFOOT:
@@ -186,6 +257,7 @@ int SimbiconControl::action()
             joint_side[SIMBICON_STH] = JOINT_RHIP;
             joint_side[SIMBICON_STK] = JOINT_RKNEE;
             joint_side[SIMBICON_STA] = JOINT_RANKLE;
+            swing_thigh = BODY_LTHIGH;
             break;
         default:
             /* Should never get here. */
@@ -205,10 +277,33 @@ int SimbiconControl::action()
         states[current_state].target[SIMBICON_STA];
 
     /* Stance hip: calculate angle and velocity of torso wrt global y-axis. */
-    //dVector3 torso_rotation;
-    //dBodyVectorToWorld(body[BODY_TORSO].id(), jk
+    dReal torso_angle = get_global_angle(BODY_TORSO);
+    dVector3 torso_velocity;
+    get_global_angular_vel(BODY_TORSO, torso_velocity);
 
     /* Swing hip: calculate angle and velocity of swing thigh wrt global y-axis. */
+    dReal swing_thigh_angle = get_global_angle(swing_thigh);
+    dVector3 swing_thigh_velocity;
+    get_global_angular_vel(swing_thigh, swing_thigh_velocity);
+
+    /* Swing hip: apply gains. */
+    dVector3 hip_position;
+    dVector3 stance_ankle_pos;
+    dVector3 hip_vel;
+    /* Shouldn't matter which hip we use for reference position. */
+    dJointGetHingeAnchor(biped.joint[JOINT_LHIP], hip_position);
+    dJointGetHingeAnchor(biped.joint[joint_side[SIMBICON_STA]], stance_ankle_pos);
+    dBodyGetPointVel(biped.body[BODY_TORSO].id(), hip_position[X], hip_position[Y],
+            hip_position[Z], hip_vel);
+    double d = hip_position[X] - stance_ankle_pos[X];
+    double v = hip_vel[X];
+    double swing_theta = states[current_state].target[SIMBICON_SWH] +
+        d * states[current_state].c_d + v * states[current_state].c_v;
+
+    printf("torso_angle: %f, swing_thigh_angle: %f, swing_theta: %f\n",
+            torso_angle, swing_thigh_angle, swing_theta);
+
+
 
 
 
