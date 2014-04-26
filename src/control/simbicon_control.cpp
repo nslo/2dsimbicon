@@ -4,8 +4,8 @@
 #include <fstream>
 #include <iostream>
 #include <render/drawstuff.h>
-#include <sim/simulator.h>
 #include <sim/biped7.h>
+#include <sim/simulator.h>
 #include "simbicon_control.h"
 
 #ifdef dDOUBLE
@@ -21,7 +21,7 @@ SimbiconControl::SimbiconControl(Biped7& human)
 {
     for (int i = 0; i < NUM_JOINTS; i++)
     {
-        kp[i] = 300.0;  // kp in simbicon paper
+        kp[i] = 300.0;
         kd[i] = 30.0;
         switch(i)
         {
@@ -61,8 +61,8 @@ int SimbiconControl::action()
         return -1;
     }
 
-    // Add joint torques to each DOF, pulling the body towards the
-    // desired state defined by _target.
+    /* Add joint torques to each DOF, pulling the body towards the
+     * desired state defined by _target. */
     for (int i = 0; i < NUM_JOINTS; i++)
     {
         dJointID jt = toy.joint[i].id();

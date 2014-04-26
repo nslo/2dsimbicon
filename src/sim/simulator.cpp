@@ -8,37 +8,33 @@
 double slope_value; // this variable decides the ground rendering
 
 Simulator::Simulator(Body& body, Environment& env, int totalSteps,
-                     double stepSize, Controller* control) :
+        double stepSize, Controller* control) :
     _env(env), _body(body), _timeSteps(totalSteps),
     _stepSize(stepSize), _currentTime(0), _controller(control),
     _enableContact(true), _mu(0.8), _randomize(false)
 {
-    /*
-    	gsl_rng_env_setup();
-    	_T = gsl_rng_default;
-    	_r = gsl_rng_alloc(_T);
-    	gsl_rng_set(_r, 0);
-    */
+    //gsl_rng_env_setup();
+    //_T = gsl_rng_default;
+    //_r = gsl_rng_alloc(_T);
+    //gsl_rng_set(_r, 0);
 
 }
 
 Simulator::Simulator(Body& body, Environment& env, int totalSteps,
-                     double stepSize) :
+        double stepSize) :
     _env(env), _body(body), _timeSteps(totalSteps),
     _stepSize(stepSize), _currentTime(0), _controller(NULL),
     _enableContact(true), _mu(0.8), _randomize(false)
 {
-    /*
-    	gsl_rng_env_setup();
-    	_T = gsl_rng_default;
-    	_r = gsl_rng_alloc(_T);
-    	gsl_rng_set(_r, 0);
-    */
+    //gsl_rng_env_setup();
+    //_T = gsl_rng_default;
+    //_r = gsl_rng_alloc(_T);
+    //gsl_rng_set(_r, 0);
 }
 
 Simulator::~Simulator()
 {
-//	gsl_rng_free(_r);
+    //gsl_rng_free(_r);
 }
 
 void Simulator::enableContact(bool flag)
@@ -67,7 +63,7 @@ double Simulator::simulate(int numSteps)
         factor = _controller->discount();
     }
 
-//	clock_t et = clock();
+    //clock_t et = clock();
     for (int i = 0; i < numSteps; i++)
     {
         double reward = 0;
@@ -89,8 +85,8 @@ double Simulator::simulate(int numSteps)
 
         simStep();
     }
-//	et = clock() - et;
-//	std::cout << double(et)/CLOCKS_PER_SEC << std::endl;
+    //et = clock() - et;
+    //std::cout << double(et)/CLOCKS_PER_SEC << std::endl;
 
     if (isnan(value))
     {
@@ -133,9 +129,9 @@ void Simulator::simStep()
     _contactGroup.empty();
 }
 /*
-void Simulator::resetRandomSeed() {
-	gsl_rng_set(_r, 0);
-}*/
+   void Simulator::resetRandomSeed() {
+   gsl_rng_set(_r, 0);
+   }*/
 
 void Simulator::reset()
 {
@@ -172,25 +168,23 @@ double Simulator::getSlope()
 {
     return _env.getSlope();
 }
-/*
-void Simulator::setRandomize(bool random) {
-	_randomize = random;
-}
 
-bool Simulator::getRandomize() {
-	return _randomize;
-}*/
+//void Simulator::setRandomize(bool random) {
+//	_randomize = random;
+//}
+//
+//bool Simulator::getRandomize() {
+//	return _randomize;
+//}
 
-void Simulator::wrapperToCallback(
-    void* data, dGeomID o1, dGeomID o2)
+void Simulator::wrapperToCallback(void* data, dGeomID o1, dGeomID o2)
 {
     Simulator* myself = (Simulator *)ptr2ActiveSim;
 
     myself->nearCallback(data, o1, o2);
 }
 
-void Simulator::nearCallback(
-    void* data, dGeomID o1, dGeomID o2)
+void Simulator::nearCallback(void* data, dGeomID o1, dGeomID o2)
 {
     UNUSED(data);
 
@@ -210,14 +204,14 @@ void Simulator::nearCallback(
     }
 
     int numc = dCollide(
-                   o1, o2, NUM_CONTACTP, &contact[0].geom, sizeof(dContact));
+            o1, o2, NUM_CONTACTP, &contact[0].geom, sizeof(dContact));
 
     if (numc > 0)
     {
         for (int i = 0; i < numc; i++)
         {
             dJointID c = dJointCreateContact(_env.world.id(),
-                                             _contactGroup.id(), contact + i);
+                    _contactGroup.id(), contact + i);
             dJointAttach(c, b1, b2);
         }
     }

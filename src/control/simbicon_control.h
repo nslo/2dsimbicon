@@ -3,8 +3,8 @@
 
 #include <iostream>
 #include <fstream>
-#include <sim/simulator.h>
 #include <sim/biped7.h>
+#include <sim/simulator.h>
 #include "controller.h"
 
 struct Simbicon_state

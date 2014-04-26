@@ -11,32 +11,6 @@
 #define dsDrawCapsule dsDrawCapsuleD
 #endif
 
-/* Initial side lengths and densities of boxes. */
-//const double YSIDE = 0.2;
-const double XSIDE = 0.04;
-const double ZSIDE = 1e-6;
-const double DENSITY = 1.0;
-
-/* Lengths (meters) of body parts. */
-const double LENGTH_TORSO = 0.48;
-const double LENGTH_THIGH = 0.45;
-const double LENGTH_SHIN = 0.45;
-const double LENGTH_FOOT = 0.2;
-
-/* Masses (kilograms) of body parts. */
-const double MASS_TORSO = 70.0;
-const double MASS_THIGH = 5.0;
-const double MASS_SHIN = 4.0;
-const double MASS_FOOT = 1.0;
-
-/* Initial torso position. */
-const double TORSO_POS = 0.5 * LENGTH_TORSO + LENGTH_THIGH + LENGTH_SHIN + 0.5 * XSIDE;
-
-static const int drawOrder[NUM_BODY] = {
-    BODY_LTHIGH, BODY_LSHIN, BODY_LFOOT,
-    BODY_TORSO,
-    BODY_RTHIGH, BODY_RSHIN, BODY_RFOOT};
-
 void Biped7::positionBody()
 {
     dMass m;
@@ -147,19 +121,18 @@ void Biped7::render()
     for (int i = 0; i < NUM_BODY; i++)
     {
         dVector3 sides;
-        int j = drawOrder[i];
-        dGeomBoxGetLengths(box[j], sides);
-        dBodyID bId = box[j].getBody();
+        dGeomBoxGetLengths(box[i], sides);
+        dBodyID bId = box[i].getBody();
 
-        if (j == BODY_TORSO)
+        if (i == BODY_TORSO)
         {
             dsSetColor(1, 1, 0);
         }
-        if (j == BODY_RTHIGH || j == BODY_RSHIN || j == BODY_RFOOT)
+        if (i == BODY_RTHIGH || i == BODY_RSHIN || i == BODY_RFOOT)
         {
             dsSetColor(0.3, 0.3, 0.6);
         }
-        if (j == BODY_LTHIGH || j == BODY_LSHIN || j == BODY_LFOOT)
+        if (i == BODY_LTHIGH || i == BODY_LSHIN || i == BODY_LFOOT)
         {
             dsSetColor(0.3, 0.6, 0.3);
         }
