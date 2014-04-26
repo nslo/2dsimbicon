@@ -77,7 +77,10 @@ private:
     double torque_limit[NUM_JOINTS];
     joint_t joint_side[SIMBICON_TARGET_END];
     dReal torso_angle;
+    dReal swing_thigh_angle;
+    dReal swing_thigh_target_angle;
     dVector3 torso_velocity;
+    dVector3 swing_thigh_velocity;
 };
 
 #endif

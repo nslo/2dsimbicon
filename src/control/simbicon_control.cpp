@@ -280,8 +280,7 @@ int SimbiconControl::action()
     get_global_angular_vel(BODY_TORSO, torso_velocity);
 
     /* Swing hip: calculate angle and velocity of swing thigh wrt global y-axis. */
-    dReal swing_thigh_angle = get_global_angle(swing_thigh);
-    dVector3 swing_thigh_velocity;
+    swing_thigh_angle = get_global_angle(swing_thigh);
     get_global_angular_vel(swing_thigh, swing_thigh_velocity);
 
     /* Swing hip: apply gains. */
@@ -295,14 +294,12 @@ int SimbiconControl::action()
             hip_position[Z], hip_vel);
     double d = hip_position[X] - stance_ankle_pos[X];
     double v = hip_vel[X];
-    double swing_theta = states[current_state].target[SIMBICON_SWH] +
+    swing_thigh_target_angle = states[current_state].target[SIMBICON_SWH] +
         d * states[current_state].c_d + v * states[current_state].c_v;
-    /* Overwrite the swing hip target angle. */
-    states[current_state].target[SIMBICON_SWH] = swing_theta;
 
-    printf("torso_angle: %f, swing_thigh_angle: %f, swing_theta: %f, torso_vel: (%f, %f, %f)\n",
-            torso_angle, swing_thigh_angle, swing_theta, torso_velocity[0], torso_velocity[1],
-            torso_velocity[2]);
+    //printf("torso_angle: %f, swing_thigh_angle: %f, swing_thigh_target_angle: %f, torso_vel: (%f, %f, %f)\n",
+    //        torso_angle, swing_thigh_angle, swing_thigh_target_angle, torso_velocity[0], torso_velocity[1],
+    //        torso_velocity[2]);
 
     /* Compute and apply torques. */
     compute_torque(SIMBICON_SWK);
@@ -323,8 +320,8 @@ void SimbiconControl::compute_torque(simbicon_target_t simbicon_joint)
         case SIMBICON_SWA:
         case SIMBICON_STK:
         case SIMBICON_STA:
-        case SIMBICON_SWH:
         {
+            /* Get control of non-hip joints from state machine. */
             joint_t j = joint_side[simbicon_joint];
             dJointID jt = biped.joint[j].id();
             dReal theta = dJointGetHingeAngle(jt);
@@ -343,8 +340,19 @@ void SimbiconControl::compute_torque(simbicon_target_t simbicon_joint)
             if (j == JOINT_LKNEE || j == JOINT_RKNEE)
             {
                 // TODO reverse torque? Or angle?
+                torque[j] *= -1.0;
             }
 
+            dJointAddHingeTorque(jt, torque[j]);
+            break;
+        }
+        case SIMBICON_SWH:
+        {
+            joint_t j = joint_side[simbicon_joint];
+            torque[j] =
+                kp[simbicon_joint] * (states[current_state].target[simbicon_joint] - swing_thigh_target_angle) +
+                kd[simbicon_joint] * swing_thigh_velocity[Z]; /* Assume 2D. */
+            dJointID jt = biped.joint[j].id();
             dJointAddHingeTorque(jt, torque[j]);
             break;
         }
@@ -352,7 +360,7 @@ void SimbiconControl::compute_torque(simbicon_target_t simbicon_joint)
         {
             /* First calcuate virtual pd control torque of torso. */
             dReal torso_torque =
-                kp[SIMBICON_TOR] * states[current_state].target[SIMBICON_TOR] - torso_angle +
+                kp[SIMBICON_TOR] * (states[current_state].target[SIMBICON_TOR] - torso_angle) +
                 kd[SIMBICON_TOR] * torso_velocity[Z]; /* Assume 2D. */
 
             /* Then calculate stance hip control as a function of torso torque
