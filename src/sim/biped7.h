@@ -47,9 +47,9 @@ private:
     Environment& env;
 
     /* Initial side lengths and densities of boxes. */
-    //const double YSIDE = 0.2;
+    const double YSIDE = 0.2; /* Not actually used. */
     const double XSIDE = 0.04;
-    const double ZSIDE = 1e-6;
+    const double ZSIDE = 1e-6; /* 2D. */
     const double DENSITY = 1.0;
 
     /* Lengths (meters) of body parts. */

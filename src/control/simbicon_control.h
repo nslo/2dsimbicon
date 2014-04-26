@@ -74,7 +74,7 @@ private:
     double target_angle[NUM_JOINTS];
     double torque[NUM_JOINTS];
     double target_angle_limit[NUM_JOINTS];
-    double torque_limit[NUM_JOINTS];
+    double torque_limit[SIMBICON_TARGET_END];
     joint_t joint_side[SIMBICON_TARGET_END];
     dReal torso_angle;
     dReal swing_thigh_angle;

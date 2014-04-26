@@ -82,6 +82,13 @@ void Biped7::positionBody()
     joint[JOINT_RANKLE].attach(body[BODY_RSHIN], body[BODY_RFOOT]);
     joint[JOINT_RANKLE].setAnchor(0, TORSO_POS - 0.5 * LENGTH_TORSO - LENGTH_THIGH - LENGTH_SHIN, 0);
     joint[JOINT_RANKLE].setAxis(0, 0, 1.0);
+
+    /* Bend the knees. TODO */
+    //for (int i = 0; i < 10; ++i)
+    //{
+    //    dJointAddHingeTorque(joint[JOINT_LKNEE].id(), 1.0);
+    //    dJointAddHingeTorque(joint[JOINT_RKNEE].id(), 1.0);
+    //}
 }
 
 Biped7::Biped7(Environment& _env) : env(_env)

@@ -60,6 +60,22 @@ dReal sin_theta(dVector3 a, dVector3 b)
     return vector_length(result) / (vector_length(a) * vector_length(b));
 }
 
+static void clamp(int index, double *values, double *limits)
+{
+    if (values[index] > limits[index])
+    {
+        values[index] = limits[index];
+    }
+    if (values[index] < -limits[index])
+    {
+        values[index] = -limits[index];
+    }
+
+
+
+}
+
+/* Get the angle of a body link with respect to the y-axis. */
 dReal SimbiconControl::get_global_angle(body_link_t link)
 {
     dVector3 link_com;
@@ -85,6 +101,7 @@ dReal SimbiconControl::get_global_angle(body_link_t link)
     return link_angle;
 }
 
+/* Get the angular velocity of a body link about its axis of rotation. */
 void SimbiconControl::get_global_angular_vel(body_link_t link, dVector3 vel)
 {
     vel[X] = dBodyGetAngularVel(biped.body[link].id())[X];
@@ -93,8 +110,7 @@ void SimbiconControl::get_global_angular_vel(body_link_t link, dVector3 vel)
 
 }
 
-
-
+/* Constructor. */
 SimbiconControl::SimbiconControl(Biped7& _biped) : biped(_biped)
 {
     /* Set up the four states here. */
@@ -153,30 +169,6 @@ SimbiconControl::SimbiconControl(Biped7& _biped) : biped(_biped)
         kp[i] = 300.0;
         kd[i] = 30.0;
         torque_limit[i] = 400;
-        //switch(i)
-        //{
-        //    case JOINT_LHIP:
-        //        target_angle[i] = -1;
-        //        break;
-        //    case JOINT_RHIP:
-        //        target_angle[i] = 0.5;
-        //        break;
-        //    case JOINT_LKNEE:
-        //        target_angle[i] = 1;
-        //        break;
-        //    case JOINT_RKNEE:
-        //        target_angle[i] = 0;
-        //        break;
-        //    case JOINT_LANKLE:
-        //        target_angle[i] = 0;
-        //        break;
-        //    case JOINT_RANKLE:
-        //        target_angle[i] = 0;
-        //        break; 
-        //    default:
-        //        assert(0);
-        //        break;
-        //}
     }
 }
 
@@ -191,43 +183,53 @@ int SimbiconControl::action()
         return -1;
     }
 
+    //printf("%f\n", sim->currentTime());
+    /* Bend the knees. TODO */
+    //if (sim->currentTime() < 0.15)
+    //{
+    //    dJointAddHingeTorque(biped.joint[JOINT_LKNEE].id(), 1.0);
+    //    dJointAddHingeTorque(biped.joint[JOINT_RKNEE].id(), 1.0);
+    //    start_time = sim->currentTime() + 1;
+    //    return 0;
+    //}
+
     elapsed_time = sim->currentTime() - start_time;
 
-    printf("state: %d, elapsed_time: %f, stance_foot Y: %f, left_foot Y: %f, right_foot Y: %f\n",
-            current_state, elapsed_time,
-            biped.body[states[current_state].stance_foot].getLinearVel()[Y],
-            biped.body[BODY_LFOOT].getLinearVel()[Y],
-            biped.body[BODY_RFOOT].getLinearVel()[Y]);
+    //printf("state: %d, elapsed_time: %f, stance_foot Y: %f, left_foot Y: %f, right_foot Y: %f\n",
+    //        current_state, elapsed_time,
+    //        biped.body[states[current_state].stance_foot].getLinearVel()[Y],
+    //        biped.body[BODY_LFOOT].getLinearVel()[Y],
+    //        biped.body[BODY_RFOOT].getLinearVel()[Y]);
 
     /* Check for transitions. */
     switch (current_state)
     {
         case 0:
         case 2:
+        {
+            /* Check for an elapsed time transition. */
+            if (elapsed_time > states[current_state].duration)
             {
-                /* Check for an elapsed time transition. */
-                if (elapsed_time > states[current_state].duration)
-                {
-                    current_state = states[current_state].next_state;
-                    start_time = sim->currentTime();
-                }
-                break;
+                current_state = states[current_state].next_state;
+                start_time = sim->currentTime();
             }
+            break;
+        }
         case 1:
         case 3:
+        {
+            /* Check for a contact transition. */
+            body_link_t foot = states[current_state].collision_foot;
+            dContactGeom temp_contacts[NUM_CONTACTP];
+            if (dCollide(sim->getEnv().ground.id(), biped.box[foot].id(),
+                        NUM_CONTACTP, temp_contacts, sizeof(dContactGeom)))
             {
-                /* Check for a contact transition. */
-                body_link_t foot = states[current_state].collision_foot;
-                dContactGeom temp_contacts[NUM_CONTACTP];
-                if (dCollide(sim->getEnv().ground.id(), biped.box[foot].id(),
-                            NUM_CONTACTP, temp_contacts, sizeof(dContactGeom)))
-                {
-                    printf("colliding foot %d\n", foot);
-                    current_state = states[current_state].next_state;
-                    start_time = sim->currentTime();
-                }
-                break;
+                printf("colliding foot %d\n", foot);
+                current_state = states[current_state].next_state;
+                start_time = sim->currentTime();
             }
+            break;
+        }
         default:
             /* Should never get here. */
             assert(0);
@@ -293,13 +295,10 @@ int SimbiconControl::action()
     dBodyGetPointVel(biped.body[BODY_TORSO].id(), hip_position[X], hip_position[Y],
             hip_position[Z], hip_vel);
     double d = hip_position[X] - stance_ankle_pos[X];
+    //double d = stance_ankle_pos[X] - hip_position[X];
     double v = hip_vel[X];
     swing_thigh_target_angle = states[current_state].target[SIMBICON_SWH] +
         d * states[current_state].c_d + v * states[current_state].c_v;
-
-    //printf("torso_angle: %f, swing_thigh_angle: %f, swing_thigh_target_angle: %f, torso_vel: (%f, %f, %f)\n",
-    //        torso_angle, swing_thigh_angle, swing_thigh_target_angle, torso_velocity[0], torso_velocity[1],
-    //        torso_velocity[2]);
 
     /* Compute and apply torques. */
     compute_torque(SIMBICON_SWK);
@@ -314,6 +313,11 @@ int SimbiconControl::action()
 
 void SimbiconControl::compute_torque(simbicon_target_t simbicon_joint)
 {
+    joint_t j = joint_side[simbicon_joint];
+    dJointID jt = biped.joint[j].id();
+    dReal theta;
+    dReal thetav;
+
     switch (simbicon_joint)
     {
         case SIMBICON_SWK:
@@ -322,59 +326,60 @@ void SimbiconControl::compute_torque(simbicon_target_t simbicon_joint)
         case SIMBICON_STA:
         {
             /* Get control of non-hip joints from state machine. */
-            joint_t j = joint_side[simbicon_joint];
-            dJointID jt = biped.joint[j].id();
-            dReal theta = dJointGetHingeAngle(jt);
-            dReal thetav = dJointGetHingeAngleRate(jt);
-            torque[j] = kp[j] * (target_angle[j] - theta) - kd[j] * thetav;
-
-            if (torque[j] > torque_limit[j])
-            {
-                torque[j] = torque_limit[j];
-            }
-            if (torque[j] < -torque_limit[j])
-            {
-                torque[j] = -torque_limit[j];
-            }
+            theta = dJointGetHingeAngle(jt);
+            thetav = dJointGetHingeAngleRate(jt);
 
             if (j == JOINT_LKNEE || j == JOINT_RKNEE)
             {
                 // TODO reverse torque? Or angle?
                 //torque[j] *= -1.0;
+                //theta *= -1;
+                //target_angle[j] *= -1;
             }
 
-            dJointAddHingeTorque(jt, torque[j]);
+            torque[j] = kp[j] * (target_angle[j] - theta) - kd[j] * thetav;
+
             break;
         }
         case SIMBICON_SWH:
         {
-            joint_t j = joint_side[simbicon_joint];
+            theta = swing_thigh_angle;
+            thetav = swing_thigh_velocity[Z];
             torque[j] =
-                kp[simbicon_joint] * (states[current_state].target[simbicon_joint] - swing_thigh_target_angle) +
-                kd[simbicon_joint] * swing_thigh_velocity[Z]; /* Assume 2D. */
-            dJointID jt = biped.joint[j].id();
-            dJointAddHingeTorque(jt, torque[j]);
+                //kp[simbicon_joint] * (states[current_state].target[simbicon_joint] - swing_thigh_target_angle) +
+                kp[simbicon_joint] * (swing_thigh_target_angle - theta) +
+                kd[simbicon_joint] * thetav; /* Assume 2D. */
             break;
         }
         case SIMBICON_STH:
         {
             /* First calcuate virtual pd control torque of torso. */
+            theta = torso_angle;
+            thetav = torso_velocity[Z]; /* Assume 2D. */
             dReal torso_torque =
-                kp[SIMBICON_TOR] * (states[current_state].target[SIMBICON_TOR] - torso_angle) +
-                kd[SIMBICON_TOR] * torso_velocity[Z]; /* Assume 2D. */
+                kp[SIMBICON_TOR] * (states[current_state].target[SIMBICON_TOR] - theta) +
+                kd[SIMBICON_TOR] * thetav;
 
             /* Then calculate stance hip control as a function of torso torque
              * and swing hip torque. */
-            joint_t j = joint_side[simbicon_joint];
             torque[j] = -1.0 * torso_torque - torque[joint_side[SIMBICON_SWH]];
-            dJointID jt = biped.joint[j].id();
-            dJointAddHingeTorque(jt, torque[j]);
             break;
         }
         default:
             /* Shouldn't get here. */
             assert(0);
     }
+    
+    clamp(j, torque, torque_limit);
+
+    //printf("torso_angle: %f, swing_thigh_angle: %f, swing_thigh_target_angle: %f, torso_vel: (%f, %f, %f)\n",
+    //        torso_angle, swing_thigh_angle, swing_thigh_target_angle, torso_velocity[0], torso_velocity[1],
+    //        torso_velocity[2]);
+
+    printf("%d angle: %f, target: %f, torque: %f\n",
+            j, theta, target_angle[j], torque[j]);
+
+    dJointAddHingeTorque(jt, torque[j]);
 }
 
 double SimbiconControl::eval()
