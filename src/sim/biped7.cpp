@@ -61,34 +61,27 @@ void Biped7::positionBody()
     /* Left hip. */
     joint[JOINT_LHIP].attach(body[BODY_TORSO], body[BODY_LTHIGH]);
     joint[JOINT_LHIP].setAnchor(0, TORSO_POS - 0.5 * LENGTH_TORSO, 0);
-    joint[JOINT_LHIP].setAxis(0, 0, 1.0);
+    joint[JOINT_LHIP].setAxis(0, 0, -1.0);
     /* Right hip. */
     joint[JOINT_RHIP].attach(body[BODY_TORSO], body[BODY_RTHIGH]);
     joint[JOINT_RHIP].setAnchor(0, TORSO_POS - 0.5 * LENGTH_TORSO, 0);
-    joint[JOINT_RHIP].setAxis(0, 0, 1.0);
+    joint[JOINT_RHIP].setAxis(0, 0, -1.0);
     /* Left knee. */
     joint[JOINT_LKNEE].attach(body[BODY_LTHIGH], body[BODY_LSHIN]);
     joint[JOINT_LKNEE].setAnchor(0, TORSO_POS - 0.5 * LENGTH_TORSO - LENGTH_THIGH, 0);
-    joint[JOINT_LKNEE].setAxis(0, 0, 1.0);
+    joint[JOINT_LKNEE].setAxis(0, 0, -1.0);
     /* Right knee. */
     joint[JOINT_RKNEE].attach(body[BODY_RTHIGH], body[BODY_RSHIN]);
     joint[JOINT_RKNEE].setAnchor(0, TORSO_POS - 0.5 * LENGTH_TORSO - LENGTH_THIGH, 0);
-    joint[JOINT_RKNEE].setAxis(0, 0, 1.0);
+    joint[JOINT_RKNEE].setAxis(0, 0, -1.0);
     /* Left ankle. */
     joint[JOINT_LANKLE].attach(body[BODY_LSHIN], body[BODY_LFOOT]);
     joint[JOINT_LANKLE].setAnchor(0, TORSO_POS - 0.5 * LENGTH_TORSO - LENGTH_THIGH - LENGTH_SHIN, 0);
-    joint[JOINT_LANKLE].setAxis(0, 0, 1.0);
+    joint[JOINT_LANKLE].setAxis(0, 0, -1.0);
     /* Right ankle. */
     joint[JOINT_RANKLE].attach(body[BODY_RSHIN], body[BODY_RFOOT]);
     joint[JOINT_RANKLE].setAnchor(0, TORSO_POS - 0.5 * LENGTH_TORSO - LENGTH_THIGH - LENGTH_SHIN, 0);
-    joint[JOINT_RANKLE].setAxis(0, 0, 1.0);
-
-    /* Bend the knees. TODO */
-    //for (int i = 0; i < 10; ++i)
-    //{
-    //    dJointAddHingeTorque(joint[JOINT_LKNEE].id(), 1.0);
-    //    dJointAddHingeTorque(joint[JOINT_RKNEE].id(), 1.0);
-    //}
+    joint[JOINT_RANKLE].setAxis(0, 0, -1.0);
 }
 
 Biped7::Biped7(Environment& _env) : env(_env)
@@ -133,15 +126,15 @@ void Biped7::render()
 
         if (i == BODY_TORSO)
         {
-            dsSetColor(1, 1, 0);
+            dsSetColor(0.0, 1.0, 0.0);
         }
         if (i == BODY_RTHIGH || i == BODY_RSHIN || i == BODY_RFOOT)
         {
-            dsSetColor(0.3, 0.3, 0.6);
+            dsSetColor(1.0, 0.0, 0.0);
         }
         if (i == BODY_LTHIGH || i == BODY_LSHIN || i == BODY_LFOOT)
         {
-            dsSetColor(0.3, 0.6, 0.3);
+            dsSetColor(0.0, 0.0, 1.0);
         }
         dsDrawBox(dBodyGetPosition(bId), dBodyGetRotation(bId), sides);
     }

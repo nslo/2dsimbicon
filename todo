@@ -25,7 +25,8 @@ Torques:
 - Then calculate torque of stance hip
 
 Misc:
-- joint, target, torque limits?  (joint limits are 1000 in paper; look at jsimbicon)
+- joint, target, torque limits?  (torque limits are 1000 in paper; look at jsimbicon)
+    - joint limits: dJointSetHingeParam(dJointID, dParamLoStop, dReal value);
 - find out what the zero reference angle is for joints - were they set straight?
 * figure out what 0.3 means in terms of simulator time
 * figure out handedness of angles; are knees reversed?

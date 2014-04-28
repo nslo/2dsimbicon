@@ -57,7 +57,7 @@ public:
     void render(); /* Not using. */
 
 private:
-    dReal get_global_angle(body_link_t link);
+    dReal get_global_angle(body_link_t link, dVector3 axis);
     void get_global_angular_vel(body_link_t link, dVector3 vel);
     void compute_torque(simbicon_target_t);
     Biped7& biped;
@@ -67,16 +67,15 @@ private:
     int current_state;
     double start_time;
     double elapsed_time;
-    body_link_t swing_thigh;
-    /* The below is for the current step. */
     double kp[SIMBICON_TARGET_END];
     double kd[SIMBICON_TARGET_END];
     double target_angle[NUM_JOINTS];
     double torque[NUM_JOINTS];
-    double target_angle_limit[NUM_JOINTS];
-    double torque_limit[SIMBICON_TARGET_END];
+    double target_angle_limit[NUM_JOINTS][2];
+    double torque_limit[SIMBICON_TARGET_END][2];
     joint_t joint_side[SIMBICON_TARGET_END];
     dReal torso_angle;
+    body_link_t swing_thigh;
     dReal swing_thigh_angle;
     dReal swing_thigh_target_angle;
     dVector3 torso_velocity;
