@@ -4,6 +4,10 @@
 
 #define UNUSED(expr) do { (void)(expr); } while (0)
 
+static float xyz[3];
+static float hpr[3];
+static dVector3(com);
+
 Renderer::Renderer(Simulator& sim) : _sim(sim)
 {
     _fn.version = DS_VERSION;
@@ -22,7 +26,7 @@ void Renderer::setActive()
 
 void Renderer::start()
 {
-    float xyz[3] = {.0f, .0f, 5.0f};
+    float xyz[3] = {0.0f, 0.0f, 5.0f};
     float hpr[3] = {.0f, -90.0f, 90.0f};
     //float xyz[3] = {2.164f,-1.3079f,1.76f};
     //float hpr[3] = {125.5f,-17.0f,0.0f};
@@ -40,6 +44,11 @@ void Renderer::step(int pause)
     }
     if (!pause)
     {
+        /* Hack to update the camera. */
+        dsGetViewpoint(xyz, hpr);
+        _sim._body.get_com(com);
+        xyz[0] = com[0];
+        dsSetViewpoint(xyz, hpr);
         _sim.simStep();
     }
 }

@@ -17,7 +17,7 @@ enum simbicon_target_t
     SIMBICON_STK,
     SIMBICON_STA,
     SIMBICON_TOR,
-    SIMBICON_TARGET_END
+    NUM_SIMBICON_TARGETS
 };
 
 struct Simbicon_state
@@ -29,7 +29,7 @@ struct Simbicon_state
     double c_d;
     double c_v;
     /* First element in this array won't be used. */
-    double target[SIMBICON_TARGET_END];
+    double target[NUM_SIMBICON_TARGETS];
     /* The foot actually on the ground. */
     body_link_t stance_foot;
     /* The foot on which we want to detect a collision. */
@@ -67,13 +67,13 @@ private:
     int current_state;
     double start_time;
     double elapsed_time;
-    double kp[SIMBICON_TARGET_END];
-    double kd[SIMBICON_TARGET_END];
+    double kp[NUM_SIMBICON_TARGETS];
+    double kd[NUM_SIMBICON_TARGETS];
     double target_angle[NUM_JOINTS];
     double torque[NUM_JOINTS];
     double target_angle_limit[NUM_JOINTS][2];
-    double torque_limit[SIMBICON_TARGET_END][2];
-    joint_t joint_side[SIMBICON_TARGET_END];
+    double torque_limit[NUM_SIMBICON_TARGETS][2];
+    joint_t joint_side[NUM_SIMBICON_TARGETS];
     dReal torso_angle;
     body_link_t swing_thigh;
     dReal swing_thigh_target_angle;

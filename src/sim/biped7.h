@@ -38,11 +38,13 @@ public:
     void reset();
 
 private:
+    void get_com(dVector3 com);
     dBody body[NUM_BODY];
     dHingeJoint joint[NUM_JOINTS];
     dJointID joint_2d_cons[NUM_BODY];
     dBox box[NUM_BODY];
     Environment& env;
+    body_link_t body_draw_order[NUM_BODY];
 
     /* Initial side lengths and densities of boxes. */
     const double YSIDE = 0.2; /* Not actually used. */

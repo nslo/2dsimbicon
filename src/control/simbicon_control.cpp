@@ -118,14 +118,14 @@ dReal SimbiconControl::get_global_angle(body_link_t link, dVector3 axis)
     link_com[Y] = dBodyGetPosition(biped.body[link].id())[Y];
     link_com[Z] = dBodyGetPosition(biped.body[link].id())[Z];
     dVector3 hip_position;
-    /* Shouldn't matter which hip we use for reference position. */
-    dJointGetHingeAnchor(biped.joint[JOINT_LHIP], hip_position);
+    biped.get_com(hip_position);
     dVector3 link_vector;
     vector_subtract(link_com, hip_position, link_vector);
     dReal link_angle = std::acos(cos_theta(link_vector, axis));
     //dReal link_angle = std::asin(sin_theta(link_vector, axis));
-    /* We're just going to hack the sign of the angle. */
-    // TODO make this more correct
+    
+    /* acos returns an angle in [0, pi], but we need a sign relative to the
+     * given vector.  For now, we'll just hack it. TODO should rectify. */
     if (link_vector[0] > 0)
     {
         link_angle *= -1;
@@ -197,7 +197,7 @@ SimbiconControl::SimbiconControl(Biped7& _biped) : biped(_biped)
     elapsed_time = 0;
     swing_thigh = BODY_LTHIGH;
 
-    for (int i = 0; i < SIMBICON_TARGET_END; ++i)
+    for (int i = 0; i < NUM_SIMBICON_TARGETS; ++i)
     {
         kp[i] = 300.0;
         kd[i] = 30.0;
@@ -255,7 +255,7 @@ int SimbiconControl::action()
             if (dCollide(sim->getEnv().ground.id(), biped.box[foot].id(),
                         NUM_CONTACTP, temp_contacts, sizeof(dContactGeom)))
             {
-                printf("colliding foot %d\n", foot);
+                //printf("colliding foot %d\n", foot);
                 current_state = states[current_state].next_state;
                 start_time = sim->currentTime();
             }
@@ -314,11 +314,10 @@ int SimbiconControl::action()
 
     /* Swing hip: apply gains. */
     dVector3 hip_position;
+    biped.get_com(hip_position);
     dVector3 stance_ankle_pos;
-    dVector3 hip_vel;
-    /* Shouldn't matter which hip we use for reference position. */
-    dJointGetHingeAnchor(biped.joint[JOINT_LHIP], hip_position);
     dJointGetHingeAnchor(biped.joint[joint_side[SIMBICON_STA]], stance_ankle_pos);
+    dVector3 hip_vel;
     dBodyGetPointVel(biped.body[BODY_TORSO].id(), hip_position[X], hip_position[Y],
             hip_position[Z], hip_vel);
     double d = hip_position[X] - stance_ankle_pos[X];
@@ -327,9 +326,9 @@ int SimbiconControl::action()
         d * states[current_state].c_d + v * states[current_state].c_v;
     target_angle[joint_side[SIMBICON_SWH]] = swing_thigh_target_angle; 
 
-    printf("time: %f, state: %d\n", sim->currentTime(), current_state);
-    printf("torso_angle: %f, torso_velocity: %f\n",
-            torso_angle, torso_velocity[Z]);
+    //printf("time: %f, state: %d\n", sim->currentTime(), current_state);
+    //printf("torso_angle: %f, torso_velocity: %f\n",
+    //        torso_angle, torso_velocity[Z]);
 
     /* Compute and apply torques. */
     compute_torque(SIMBICON_SWK);
@@ -339,7 +338,7 @@ int SimbiconControl::action()
     compute_torque(SIMBICON_SWH);
     compute_torque(SIMBICON_STH);
 
-    printf("\n");
+    //printf("\n");
 
     return 0;
 }
@@ -392,13 +391,14 @@ void SimbiconControl::compute_torque(simbicon_target_t simbicon_joint)
         default:
             /* Shouldn't get here. */
             assert(0);
+            break;
     }
     
     clamp(j, torque, torque_limit);
     dJointAddHingeTorque(jt, torque[j]);
 
-    printf("%d angle: %f, target_angle: %f, velocity: %f, torque: %f\n",
-            j, theta, target_angle[j], thetav, torque[j]);
+    //printf("%d angle: %f, target_angle: %f, velocity: %f, torque: %f\n",
+    //        j, theta, target_angle[j], thetav, torque[j]);
 }
 
 double SimbiconControl::eval()

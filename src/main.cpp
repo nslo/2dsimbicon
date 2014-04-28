@@ -1,6 +1,7 @@
 #include <control/simbicon_control.h>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <render/renderer.h>
 #include <sim/simulator.h>
 #include <sim/biped7.h>
@@ -11,7 +12,7 @@ int main(int argc, char **argv)
 
     const int VPX = 1024;
     const int VPY = 768;
-    const int render_steps = 10000;
+    const int render_steps = std::numeric_limits<unsigned int>::max();
     const double gx = 0.0;
     const double gy = -9.8;
     const double gz = 0.0;

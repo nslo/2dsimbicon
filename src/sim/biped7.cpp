@@ -108,6 +108,16 @@ Biped7::Biped7(Environment& _env) : env(_env)
         dJointAttach(joint_2d_cons[i], body[i].id(), 0);
     }
 
+    /* The first thing drawn seems to get priority - the next is not drawn
+     * over it... */
+    body_draw_order[0] = BODY_RTHIGH;
+    body_draw_order[1] = BODY_RSHIN;
+    body_draw_order[2] = BODY_RFOOT;
+    body_draw_order[3] = BODY_TORSO;
+    body_draw_order[4] = BODY_LTHIGH;
+    body_draw_order[5] = BODY_LSHIN;
+    body_draw_order[6] = BODY_LFOOT;
+
     positionBody();
 }
 
@@ -115,11 +125,19 @@ void Biped7::reset()
 {
 }
 
+void Biped7::get_com(dVector3 com)
+{
+    /* Shouldn't matter which hip we use for reference position. */
+    dJointGetHingeAnchor(joint[JOINT_LHIP], com);
+}
+
 void Biped7::render()
 {
+    /* Draw the body links. */
     dsSetTexture(DS_WOOD);
-    for (int i = 0; i < NUM_BODY; i++)
+    for (int order = 0; order < NUM_BODY; ++order)
     {
+        int i = body_draw_order[order];
         dVector3 sides;
         dGeomBoxGetLengths(box[i], sides);
         dBodyID bId = box[i].getBody();
@@ -139,14 +157,15 @@ void Biped7::render()
         dsDrawBox(dBodyGetPosition(bId), dBodyGetRotation(bId), sides);
     }
 
-    for (int i = 0; i < NUM_JOINTS; i++)
-    {
-        dMatrix3 R;
-        dRSetIdentity(R);
-        dVector3 jpos, sides;
-        sides[0] = sides[1] = sides[2] = 0.05;
-        dsSetColor(0.0, 1.0, 1.0);
-        dJointGetHingeAnchor(joint[i].id(), jpos);
-        dsDrawBox(jpos, R, sides);
-    }
+    /* Draw the joints. */
+    //for (int i = 0; i < NUM_JOINTS; i++)
+    //{
+    //    dMatrix3 R;
+    //    dRSetIdentity(R);
+    //    dVector3 jpos, sides;
+    //    sides[0] = sides[1] = sides[2] = 0.05;
+    //    dsSetColor(0.0, 1.0, 1.0);
+    //    dJointGetHingeAnchor(joint[i].id(), jpos);
+    //    dsDrawBox(jpos, R, sides);
+    //}
 }

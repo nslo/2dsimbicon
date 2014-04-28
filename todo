@@ -32,6 +32,7 @@ Misc:
 * figure out handedness of angles; are knees reversed?
 
 Sim:
+- camera follows figure
 - apply forces with arrow keys
 - uneven terrain
-- camera follows figure
+- 3d
