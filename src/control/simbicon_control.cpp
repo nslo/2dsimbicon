@@ -404,7 +404,7 @@ void SimbiconControl::compute_torque(simbicon_target_t simbicon_joint)
             //thetav = swing_thigh_velocity[Z]; /* Assume 2D. */
             theta = dJointGetHingeAngle(jt) + torso_angle;
             thetav = dJointGetHingeAngleRate(jt) + torso_velocity[Z];
-            torque[j] = kp[j] * (target_angle[j] - theta) + kd[j] * thetav;
+            torque[j] = kp[j] * (target_angle[j] - theta) - kd[j] * thetav;
                 //kp[simbicon_joint] * (states[current_state].target[simbicon_joint] - swing_thigh_target_angle) +
                 //kp[simbicon_joint] * (swing_thigh_target_angle - theta) +
             break;
@@ -416,7 +416,7 @@ void SimbiconControl::compute_torque(simbicon_target_t simbicon_joint)
             theta = torso_angle;
             thetav = torso_velocity[Z]; /* Assume 2D. */
             dReal torso_torque =
-                kp[SIMBICON_TOR] * (target_angle[j] - theta) +
+                kp[SIMBICON_TOR] * (target_angle[j] - theta) -
                 kd[SIMBICON_TOR] * thetav;
 
             /* Then calculate stance hip control as a function of torso torque
