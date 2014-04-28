@@ -8,14 +8,14 @@
 /* Link and joint labeling and ordering. */
 enum body_link_t
 {
-    BODY_TORSO, //0
-    BODY_LTHIGH,//1
-    BODY_RTHIGH,//2
-    BODY_LSHIN, //3
-    BODY_RSHIN, //4
-    BODY_LFOOT, //5
-    BODY_RFOOT, //6
-    BODY_END    //7
+    BODY_TORSO,     //0
+    BODY_LTHIGH,    //1
+    BODY_RTHIGH,    //2
+    BODY_LSHIN,     //3
+    BODY_RSHIN,     //4
+    BODY_LFOOT,     //5
+    BODY_RFOOT,     //6
+    NUM_BODY        //7
 };
 enum joint_t
 {
@@ -24,11 +24,9 @@ enum joint_t
     JOINT_LKNEE,    //2
     JOINT_RKNEE,    //3
     JOINT_LANKLE,   //4
-    JOINT_RANKLE    //5
+    JOINT_RANKLE,   //5
+    NUM_JOINTS      //6
 };
-
-const int NUM_BODY = BODY_END;
-const int NUM_JOINTS = NUM_BODY - 1;
 
 class Biped7 : public Body
 {

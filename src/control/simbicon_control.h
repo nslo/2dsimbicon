@@ -32,7 +32,7 @@ struct Simbicon_state
     double target[SIMBICON_TARGET_END];
     /* The foot actually on the ground. */
     body_link_t stance_foot;
-    /* The foot we want to detect a collision on. */
+    /* The foot on which we want to detect a collision. */
     body_link_t collision_foot;
 };
 
@@ -76,10 +76,8 @@ private:
     joint_t joint_side[SIMBICON_TARGET_END];
     dReal torso_angle;
     body_link_t swing_thigh;
-    dReal swing_thigh_angle;
     dReal swing_thigh_target_angle;
     dVector3 torso_velocity;
-    dVector3 swing_thigh_velocity;
 };
 
 #endif
