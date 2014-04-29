@@ -23,6 +23,7 @@ enum coord_t
     Z
 };
 
+const int MIN_TRANSITION_CONTACTS = 2;
 dVector3 y_axis_up = {0, 1, 0};
 
 /* Ensure that angles are given in positive clockwise coords. */
@@ -253,7 +254,8 @@ int SimbiconControl::action()
             body_link_t foot = states[current_state].collision_foot;
             dContactGeom temp_contacts[NUM_CONTACTP];
             if (dCollide(sim->getEnv().ground.id(), biped.box[foot].id(),
-                        NUM_CONTACTP, temp_contacts, sizeof(dContactGeom)))
+                        NUM_CONTACTP, temp_contacts, sizeof(dContactGeom))
+                    >= MIN_TRANSITION_CONTACTS)
             {
                 //printf("colliding foot %d\n", foot);
                 current_state = states[current_state].next_state;

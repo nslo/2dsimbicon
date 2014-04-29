@@ -6,8 +6,6 @@
 #include "body.h"
 #include "environment.h"
 
-const int SPS = 1000;
-const double STEP_SIZE = 1.0 / SPS;
 const int NUM_CONTACTP = 3;
 
 class Simulator

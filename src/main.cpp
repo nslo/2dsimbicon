@@ -16,6 +16,8 @@ int main(int argc, char **argv)
     const double gx = 0.0;
     const double gy = -9.8;
     const double gz = 0.0;
+    const int SPS = 1000;
+    const double STEP_SIZE = 1.0 / SPS;
 
     Environment myEnv(gx, gy, gz);
     Biped7 myBody(myEnv);
@@ -30,4 +32,3 @@ int main(int argc, char **argv)
 
     return 0;
 }
-
