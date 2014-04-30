@@ -3,7 +3,16 @@
 #include <iostream>
 #include "simulator.h"
 
+#include <render/drawstuff.h>
+
 #define UNUSED(expr) do { (void)(expr); } while (0)
+
+double back_push_end_time = 0;
+double fwd_push_end_time = 0;
+double push_duration = 0.1;
+double push_force = 500;
+bool back_push = false;
+bool fwd_push = false;
 
 double slope_value; // this variable decides the ground rendering
 
@@ -17,7 +26,6 @@ Simulator::Simulator(Body& body, Environment& env, int totalSteps,
     //_T = gsl_rng_default;
     //_r = gsl_rng_alloc(_T);
     //gsl_rng_set(_r, 0);
-
 }
 
 Simulator::Simulator(Body& body, Environment& env, int totalSteps,
@@ -111,6 +119,30 @@ double Simulator::simulate()
 
 void Simulator::render()
 {
+    /* Big hack to render a push. */
+    if (_currentTime < back_push_end_time)
+    {
+        //dMass m;
+        //dVector3 torso;
+        //_body.get_torso_pos(torso);
+        //dBody arrow;
+        //arrow.setPosition(torso[2], torso[1], torso[2]) ;
+        //m.setBox(0, 0.04, 0.2, 1e-6);
+        //m.adjust(0);
+        //arrow.setMass(&m);
+        //dBox arrow_box;
+        //arrow_box.setBody(arrow);
+
+        //dVector3 sides;
+        //dGeomBoxGetLengths(arrow_box, sides);
+        //dBodyID bId = arrow_box.getBody();
+        //dsSetColor(0.0, 0.0, 0.0);
+        //dsDrawBoxD(dBodyGetPosition(bId), dBodyGetRotation(bId), sides);
+    }
+    if (_currentTime < fwd_push_end_time)
+    {
+    }
+
     _body.render();
     if (_controller)
         _controller->render();
@@ -118,6 +150,28 @@ void Simulator::render()
 
 void Simulator::simStep()
 {
+    /* Big huge hack to handle push events. */
+    if (back_push)
+    {
+        back_push = false;
+        back_push_end_time = _currentTime + push_duration;
+    }
+    if (fwd_push)
+    {
+        fwd_push = false;
+        fwd_push_end_time = _currentTime + push_duration;
+    }
+    if (_currentTime < back_push_end_time)
+    {
+        dVector3 push = {-push_force, 0, 0};
+        _body.apply_push(push);
+    }
+    if (_currentTime < fwd_push_end_time)
+    {
+        dVector3 push = {push_force, 0, 0};
+        _body.apply_push(push);
+    }
+
     if (_controller)
     {
         _controller->action();

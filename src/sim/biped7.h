@@ -39,6 +39,8 @@ public:
 
 private:
     void get_com(dVector3 com);
+    void get_torso_pos(dVector3);
+    void apply_push(dVector3);
     dBody body[NUM_BODY];
     dHingeJoint joint[NUM_JOINTS];
     dJointID joint_2d_cons[NUM_BODY];

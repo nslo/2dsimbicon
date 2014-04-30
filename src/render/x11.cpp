@@ -39,6 +39,11 @@
 #include "version.h"
 #include "internal.h"
 
+
+// TODO HACK ALERT
+extern bool back_push;
+extern bool fwd_push;
+
 //***************************************************************************
 // error handling for unix
 
@@ -227,6 +232,18 @@ static void handleEvent(XEvent &event, dsFunctions *fn)
         if ((event.xkey.state & ControlMask) == 0)
         {
             if (key >= ' ' && key <= 126 && fn->command) fn->command(key);
+
+            switch (key)
+            {
+                case XK_Left:
+                    back_push = true;
+                    fprintf(stderr, "%s\n", "left");
+                    break;
+                case XK_Right:
+                    fwd_push = true;
+                    fprintf(stderr, "%s\n", "right");
+                    break;
+            }
         }
         else if (event.xkey.state & ControlMask)
         {

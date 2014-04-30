@@ -131,6 +131,18 @@ void Biped7::get_com(dVector3 com)
     dJointGetHingeAnchor(joint[JOINT_LHIP], com);
 }
 
+void Biped7::get_torso_pos(dVector3 torso)
+{
+    torso[0] = dBodyGetPosition(body[BODY_TORSO].id())[0];
+    torso[1] = dBodyGetPosition(body[BODY_TORSO].id())[1];
+    torso[2] = dBodyGetPosition(body[BODY_TORSO].id())[2];
+}
+
+void Biped7::apply_push(dVector3 f)
+{
+    dBodyAddForce(body[BODY_TORSO].id(), f[0], f[1], f[2]);
+}
+
 void Biped7::render()
 {
     /* Draw the body links. */

@@ -6,6 +6,7 @@
 class Body
 {
 friend class Renderer;
+friend class Simulator;
 
 public:
     virtual ~Body() {};
@@ -14,6 +15,8 @@ public:
 
 private:
     virtual void get_com(dVector3) = 0;
+    virtual void get_torso_pos(dVector3) = 0;
+    virtual void apply_push(dVector3) = 0;
 };
 
 #endif
