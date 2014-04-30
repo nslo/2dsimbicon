@@ -7,14 +7,38 @@
 
 #define UNUSED(expr) do { (void)(expr); } while (0)
 
+enum push_direction {BACK, FWD};
+
 double back_push_end_time = 0;
 double fwd_push_end_time = 0;
 double push_duration = 0.1;
 double push_force = 500;
 bool back_push = false;
 bool fwd_push = false;
+double arrow_sides[3] = {0.5, 0.03, 1e-6};
 
-double slope_value; // this variable decides the ground rendering
+double slope_value; /* This variable decides the ground rendering. */
+
+/* Note: doesn't take scaling into account at all. Only meant to be used with
+ * the default view in 2D. */
+static void draw_arrow(dVector3 torso, push_direction dir)
+{
+    dMatrix3 rotation;
+    dRSetIdentity (rotation);
+    dVector3 arrow_pos;
+    arrow_pos[0] = torso[0];
+    if (dir == BACK)
+    {
+        arrow_pos[0] += arrow_sides[0] * 0.5;
+    }
+    if (dir == FWD)
+    {
+        arrow_pos[0] -= arrow_sides[0] * 0.5;
+    }
+    arrow_pos[1] = torso[1]; arrow_pos[2] = torso[2];
+    dsSetColor(0.0, 0.0, 0.0);
+    dsDrawBoxD(arrow_pos, rotation, arrow_sides);
+}
 
 Simulator::Simulator(Body& body, Environment& env, int totalSteps,
         double stepSize, Controller* control) :
@@ -122,28 +146,19 @@ void Simulator::render()
     /* Big hack to render a push. */
     if (_currentTime < back_push_end_time)
     {
-        //dMass m;
-        //dVector3 torso;
-        //_body.get_torso_pos(torso);
-        //dBody arrow;
-        //arrow.setPosition(torso[2], torso[1], torso[2]) ;
-        //m.setBox(0, 0.04, 0.2, 1e-6);
-        //m.adjust(0);
-        //arrow.setMass(&m);
-        //dBox arrow_box;
-        //arrow_box.setBody(arrow);
-
-        //dVector3 sides;
-        //dGeomBoxGetLengths(arrow_box, sides);
-        //dBodyID bId = arrow_box.getBody();
-        //dsSetColor(0.0, 0.0, 0.0);
-        //dsDrawBoxD(dBodyGetPosition(bId), dBodyGetRotation(bId), sides);
+        dVector3 torso;
+        _body.get_torso_pos(torso);
+        draw_arrow(torso, BACK);
     }
     if (_currentTime < fwd_push_end_time)
     {
+        dVector3 torso;
+        _body.get_torso_pos(torso);
+        draw_arrow(torso, FWD);
     }
 
     _body.render();
+
     if (_controller)
         _controller->render();
 }

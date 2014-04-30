@@ -1,7 +1,9 @@
 Sim:
-- apply forces with arrow keys
-- uneven terrain
+- render applied forces
+- tune parameters for robustness
+- startup from standstill
 - speed (opengl/glfw?)
+- uneven terrain
 - 3d
 
 State transitions:

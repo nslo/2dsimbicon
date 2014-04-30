@@ -237,11 +237,9 @@ static void handleEvent(XEvent &event, dsFunctions *fn)
             {
                 case XK_Left:
                     back_push = true;
-                    fprintf(stderr, "%s\n", "left");
                     break;
                 case XK_Right:
                     fwd_push = true;
-                    fprintf(stderr, "%s\n", "right");
                     break;
             }
         }
