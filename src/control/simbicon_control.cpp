@@ -23,7 +23,7 @@ enum coord_t
     Z
 };
 
-const int MIN_TRANSITION_CONTACTS = 2;
+const int MIN_TRANSITION_CONTACTS = 1;
 dVector3 y_axis_up = {0, 1, 0};
 
 /* Ensure that angles are given in positive clockwise coords. */
@@ -126,7 +126,7 @@ dReal SimbiconControl::get_global_angle(body_link_t link, dVector3 axis)
     //dReal link_angle = std::asin(sin_theta(link_vector, axis));
     
     /* acos returns an angle in [0, pi], but we need a sign relative to the
-     * given vector.  For now, we'll just hack it. TODO should rectify. */
+     * given vector.  For now, we'll just hack it. TODO rectify. */
     if (link_vector[0] > 0)
     {
         link_angle *= -1;
@@ -158,6 +158,8 @@ SimbiconControl::SimbiconControl(Biped7& _biped) : biped(_biped)
     state0.target[SIMBICON_TOR] = 0.0;      /* WRT world. */
     state0.target[SIMBICON_SWH] = 0.40;     /* WRT world. */
     state0.target[SIMBICON_SWK] = -1.10;    /* Local. */
+    //state0.target[SIMBICON_SWH] = 0.60;     /* WRT world. */
+    //state0.target[SIMBICON_SWK] = -1.40;    /* Local. */
     state0.target[SIMBICON_SWA] = 0.20;     /* Local. */
     state0.target[SIMBICON_STK] = -0.05;    /* Local. */
     state0.target[SIMBICON_STA] = 0.20;     /* Local. */

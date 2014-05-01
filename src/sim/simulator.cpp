@@ -38,6 +38,14 @@ static void draw_arrow(dVector3 torso, push_direction dir)
     arrow_pos[1] = torso[1]; arrow_pos[2] = torso[2];
     dsSetColor(0.0, 0.0, 0.0);
     dsDrawBoxD(arrow_pos, rotation, arrow_sides);
+
+    //double epsilon = 0.1;
+    //double arrowhead_pos[3] = {torso[0], torso[1], torso[2]};
+    //double vertex_1[3] = {torso[0] + epsilon, torso[1] - epsilon, torso[2]};
+    //double vertex_2[3] = {torso[0] + epsilon, torso[1] + epsilon, torso[2]};
+    //double vertex_3[3] = {torso[0] - epsilon, torso[1], torso[2]};
+    //dsDrawTriangleD(arrowhead_pos, (rotation), vertex_1,
+    //        vertex_2, vertex_3, 1);
 }
 
 Simulator::Simulator(Body& body, Environment& env, int totalSteps,

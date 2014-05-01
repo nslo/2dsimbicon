@@ -1,10 +1,29 @@
+Briefly remind us what was your original goal / plan.
+
+What did you actually do?   Give a little bit of detail here.
+
+Show your results.
+
+Give some analysis of the results if you can -- if your technique uses parameters, how do varying those parameters make a difference?   If you tried different approaches, compare them.
+
+Discuss.   What insights did you gain?     What worked as expected and what surprised you?   What did you learn as a result of doing the project?   What would you change if you were to start over again?
+
+What would you do to extend the project if you had more time?
+
+
+
 Sim:
-- render applied forces
 - tune parameters for robustness
 - startup from standstill
 - speed (opengl/glfw?)
+- run
 - uneven terrain
 - 3d
+
+Things done:
+- Had to turn force limits down
+- Altered contact model resulting in slightly nicer gait
+- If I alter gait (swing hip / knee angles) for a higher step, more robust to pushes
 
 State transitions:
 - Keep timer (global? each state struct?)
